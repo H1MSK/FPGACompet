@@ -2,7 +2,7 @@
 #define PAL_H
 
 #include <stdint.h>
-#include <stdbool.h>
+#include "common.h"
 
 // to IP
 void IP_init();
@@ -16,8 +16,12 @@ uint32_t IP_get(uint32_t addr);
 
 // to host
 void start_server();
-bool accept_client();
-void read_data(uint8_t* data, uint32_t len);
-void write_data(const uint8_t* data, uint32_t len);
+void accept_client();
+void close_client();
+uint32_t read_data(uint8_t* data, uint32_t len);
+uint32_t write_data(const uint8_t* data, uint32_t len);
+
+extern uint8_t in_img[MAX_IMG_SIZE];
+extern uint8_t out_img[MAX_IMG_SIZE];
 
 #endif  // PAL_H

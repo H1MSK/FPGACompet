@@ -5,8 +5,8 @@
 
 #define MAGIC_WRITE_IMG 0x01234567
 #define MAGIC_READ_IMG  0x76543210
-#define MAGIC_SEND_ARGS 0x89ABCDEF
-#define MAGIC_RECV_ARGS 0xFEDCBA98
+#define MAGIC_WRITE_ARG 0x89ABCDEF
+#define MAGIC_READ_ARG  0xFEDCBA98
 
 typedef struct PackHeader {
   uint32_t magic;
@@ -21,6 +21,7 @@ typedef struct PackHeader {
       uint32_t data;
     } arg;
   } data;
+  uint32_t content_len;
 } PackHeader;
 
 #endif  // PACK_H

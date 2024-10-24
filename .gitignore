@@ -1,0 +1,5 @@
+board/build
+
+host/.venv
+host/__pycache__
+host/test_out.png

@@ -5,40 +5,49 @@ from constant import *
 
 _sock: socket.socket = None
 
-def connect(host, port):
+def connect(host = "localhost", port = 10240):
   global _sock
   _sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
   _sock.connect((host, port))
 
 def write_img(img: List[int]):
-  # header has a 12 byte length
-  buf = struct.pack('<iHHi', WRITE_IMG, 1024, 1024, 0) + bytes(img)
-  _sock.send(buf)
-  resp = _sock.recv(4)
-  assert resp == b'ok\0\0'
+  content = bytes(img)
+  header = struct.pack('<IHHII', WRITE_IMG, 1024, 1024, 0, len(content))
+  buf = header + content
+  print(f"Write img, header: {header}")
+  _sock.send(buf, )
+  resp = _sock.recv(2)
+  assert resp == b'ok'
 
 def read_img():
-  # header has a 12 byte length
-  buf = struct.pack('<iHHi', READ_IMG, 1024, 1024, 0)
+  buf = struct.pack('<IHHiI', READ_IMG, 1024, 1024, 0, 0)
+  print(f"Read img, header: {buf}")
   _sock.send(buf)
+  resp = _sock.recv(2)
+  assert resp == b'ok'
   img = []
-  for line in range(1024):
-    resp = _sock.recv(1024)
-    img.extend(struct.unpack('<B', resp[i * 4:(i + 1) * 4])[0] for i in range(1024))
+  cur_len = 0
+  total_len = 1024 * 1024 * 1
+  while cur_len < total_len:
+    resp = _sock.recv(min(MAX_PACK_SIZE, total_len - cur_len))
+    cur_len += len(resp)
+    img.extend(int(c) for c in resp)
   return img
   
-def send_arg(addr: int, data: int):
+def write_arg(addr: int, data: int):
   assert 0 <= addr < 1024
-  # header has a 12 byte length
-  buf = struct.pack('<iii', SEND_ARG, addr, data)
+  buf = struct.pack('<IiiI', WRITE_ARG, addr, data, 0)
+  print(f"Write arg, header: {buf}")
   _sock.send(buf)
-  resp = _sock.recv(4)
-  assert resp == b'ok\0\0'
+  resp = _sock.recv(2)
+  assert resp == b'ok'
   
-def recv_arg(addr: int):
+def read_arg(addr: int):
   assert 0 <= addr < 1024
-  # header has a 12 byte length
-  buf = struct.pack('<iii', RECV_ARG, addr, 0)
+  buf = struct.pack('<IiiI', READ_ARG, addr, 0, 0)
+  print(f"Read arg, header: {buf}")
   _sock.send(buf)
+  resp = _sock.recv(2)
+  assert resp == b'ok'
   resp = _sock.recv(4)
   return struct.unpack('<I', resp)[0]
