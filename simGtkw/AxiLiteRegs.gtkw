@@ -1,0 +1,176 @@
+[*]
+[*] GTKWave Analyzer v3.3.104 (w)1999-2020 BSI
+[*] Fri Oct 25 07:37:16 2024
+[*]
+[dumpfile] "/home/hart/Desktop/Competition/FPGACompet.AxiLite/simWorkspace/AxiLiteRegs/test/wave.fst"
+[dumpfile_mtime] "Fri Oct 25 07:32:49 2024"
+[dumpfile_size] 2747
+[savefile] "/home/hart/Desktop/Competition/FPGACompet.AxiLite/simGtkw/AxiLiteRegs.gtkw"
+[timestart] 0
+[size] 1850 1016
+[pos] -1 -1
+*-7.188954 461 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] TOP.
+[sst_width] 370
+[signals_width] 336
+[sst_expanded] 1
+[sst_vpaned_height] 289
+@28
+TOP.clk
+TOP.reset
+@200
+-AR
+@28
+TOP.axilite_ar_valid
+TOP.axilite_ar_ready
+@22
+TOP.axilite_ar_payload_addr[13:0]
+@28
+TOP.axilite_ar_payload_prot[2:0]
+@200
+-R
+@28
+TOP.axilite_r_valid
+TOP.axilite_r_ready
+@22
+TOP.axilite_r_payload_data[31:0]
+@28
+TOP.axilite_r_payload_resp[1:0]
+@200
+-AW
+@28
+TOP.axilite_aw_valid
+TOP.axilite_aw_ready
+@22
+TOP.axilite_aw_payload_addr[13:0]
+@28
+TOP.axilite_aw_payload_prot[2:0]
+@200
+-W
+@28
+TOP.axilite_w_valid
+TOP.axilite_w_ready
+@c00022
+TOP.axilite_w_payload_data[31:0]
+@28
+(0)TOP.axilite_w_payload_data[31:0]
+(1)TOP.axilite_w_payload_data[31:0]
+(2)TOP.axilite_w_payload_data[31:0]
+(3)TOP.axilite_w_payload_data[31:0]
+(4)TOP.axilite_w_payload_data[31:0]
+(5)TOP.axilite_w_payload_data[31:0]
+(6)TOP.axilite_w_payload_data[31:0]
+(7)TOP.axilite_w_payload_data[31:0]
+(8)TOP.axilite_w_payload_data[31:0]
+(9)TOP.axilite_w_payload_data[31:0]
+(10)TOP.axilite_w_payload_data[31:0]
+(11)TOP.axilite_w_payload_data[31:0]
+(12)TOP.axilite_w_payload_data[31:0]
+(13)TOP.axilite_w_payload_data[31:0]
+(14)TOP.axilite_w_payload_data[31:0]
+(15)TOP.axilite_w_payload_data[31:0]
+(16)TOP.axilite_w_payload_data[31:0]
+(17)TOP.axilite_w_payload_data[31:0]
+(18)TOP.axilite_w_payload_data[31:0]
+(19)TOP.axilite_w_payload_data[31:0]
+(20)TOP.axilite_w_payload_data[31:0]
+(21)TOP.axilite_w_payload_data[31:0]
+(22)TOP.axilite_w_payload_data[31:0]
+(23)TOP.axilite_w_payload_data[31:0]
+(24)TOP.axilite_w_payload_data[31:0]
+(25)TOP.axilite_w_payload_data[31:0]
+(26)TOP.axilite_w_payload_data[31:0]
+(27)TOP.axilite_w_payload_data[31:0]
+(28)TOP.axilite_w_payload_data[31:0]
+(29)TOP.axilite_w_payload_data[31:0]
+(30)TOP.axilite_w_payload_data[31:0]
+(31)TOP.axilite_w_payload_data[31:0]
+@1401200
+-group_end
+@c00022
+TOP.axilite_w_payload_strb[3:0]
+@28
+(0)TOP.axilite_w_payload_strb[3:0]
+(1)TOP.axilite_w_payload_strb[3:0]
+(2)TOP.axilite_w_payload_strb[3:0]
+(3)TOP.axilite_w_payload_strb[3:0]
+@1401200
+-group_end
+@200
+-B
+@28
+TOP.axilite_b_valid
+TOP.axilite_b_ready
+TOP.axilite_b_payload_resp[1:0]
+@200
+-signals
+@28
+TOP.AxiLiteRegs.in_ip_output_valid
+TOP.AxiLiteRegs.in_ip_output_ready
+TOP.AxiLiteRegs.in_ip_output_last
+TOP.out_busy
+@22
+TOP.out_coeff_0[7:0]
+TOP.out_coeff_1[7:0]
+TOP.out_coeff_2[7:0]
+TOP.out_coeff_3[7:0]
+TOP.out_coeff_4[7:0]
+TOP.out_coeff_5[7:0]
+TOP.out_thres_0[7:0]
+TOP.out_thres_1[7:0]
+@200
+-registers
+@28
+TOP.AxiLiteRegs.reg_busy
+TOP.AxiLiteRegs.f_done
+TOP.AxiLiteRegs.f_start
+TOP.AxiLiteRegs.f_done
+TOP.AxiLiteRegs.reg_busy
+@23
+TOP.AxiLiteRegs.busif_reg_rdata[31:0]
+@28
+TOP.AxiLiteRegs.write_hit_0x0000
+TOP.AxiLiteRegs.read_hit_0x0000
+TOP.AxiLiteRegs.write_hit_0x0004
+TOP.AxiLiteRegs.read_hit_0x0004
+TOP.AxiLiteRegs.write_hit_0x0080
+TOP.AxiLiteRegs.read_hit_0x0080
+@22
+TOP.AxiLiteRegs.out_thres_0[7:0]
+@28
+TOP.AxiLiteRegs.write_hit_0x0084
+TOP.AxiLiteRegs.read_hit_0x0084
+@22
+TOP.AxiLiteRegs.out_thres_1[7:0]
+@28
+TOP.AxiLiteRegs.write_hit_0x0100
+TOP.AxiLiteRegs.read_hit_0x0100
+@22
+TOP.AxiLiteRegs.out_coeff_0[7:0]
+@28
+TOP.AxiLiteRegs.write_hit_0x0104
+TOP.AxiLiteRegs.read_hit_0x0104
+@22
+TOP.AxiLiteRegs.out_coeff_1[7:0]
+@28
+TOP.AxiLiteRegs.write_hit_0x0108
+TOP.AxiLiteRegs.read_hit_0x0108
+@22
+TOP.AxiLiteRegs.out_coeff_2[7:0]
+@28
+TOP.AxiLiteRegs.write_hit_0x010c
+TOP.AxiLiteRegs.read_hit_0x010c
+@22
+TOP.AxiLiteRegs.out_coeff_3[7:0]
+@28
+TOP.AxiLiteRegs.write_hit_0x0110
+TOP.AxiLiteRegs.read_hit_0x0110
+@22
+TOP.AxiLiteRegs.out_coeff_4[7:0]
+@28
+TOP.AxiLiteRegs.write_hit_0x0114
+TOP.AxiLiteRegs.read_hit_0x0114
+@22
+TOP.AxiLiteRegs.out_coeff_5[7:0]
+[pattern_trace] 1
+[pattern_trace] 0
