@@ -3,13 +3,13 @@
 
 #include <stdint.h>
 
-#define MAGIC_WRITE_IMG 0x01234567
-#define MAGIC_READ_IMG  0x76543210
-#define MAGIC_WRITE_ARG 0x89ABCDEF
-#define MAGIC_READ_ARG  0xFEDCBA98
+#define ID_WRITE_IMG 0x01234567
+#define ID_READ_IMG  0x76543210
+#define ID_WRITE_ARG 0x89ABCDEF
+#define ID_READ_ARG  0xFEDCBA98
 
-typedef struct PackHeader {
-  uint32_t magic;
+typedef struct ClientPackHeader {
+  uint32_t identifier;
   union {
     struct {
       uint16_t height;
@@ -22,6 +22,11 @@ typedef struct PackHeader {
     } arg;
   } data;
   uint32_t content_len;
-} PackHeader;
+} ClientPackHeader;
+
+typedef struct ServerPackHeader {
+  uint16_t status;
+  uint32_t content_len;
+} ServerPackHeader;
 
 #endif  // PACK_H
