@@ -1,4 +1,4 @@
-.PHONY: gen sim wave
+.PHONY: gen sim wave clean
 
 gen:
 	sbt "runMain axi_lite_regs.GenerateVerilog"
@@ -8,3 +8,6 @@ sim:
 
 wave:
 	gtkwave simGtkw/AxiLiteRegs.gtkw
+
+clean:
+	rm -r simWorkspace/*
