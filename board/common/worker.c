@@ -1,5 +1,6 @@
 #include "worker.h"
 #include <stdio.h>
+#include <stdbool.h>
 #include "common.h"
 #include "pack.h"
 #include "pal.h"
@@ -16,7 +17,7 @@ inline static uint32_t min(uint32_t a, uint32_t b) {
   return a < b ? a : b;
 }
 
-inline static void do_recv_img() {
+inline static bool do_recv_img() {
   uint8_t* ptr = in_img;
   uint32_t total_len = client.content_len;
   printf("#%d: recv img, size: %d x %d, content length: %d\n", pack_cnt,
@@ -25,6 +26,7 @@ inline static void do_recv_img() {
   uint32_t current_len = 0, read_len;
   while (current_len < total_len) {
     read_len = read_data(ptr, min(total_len - current_len, MAX_PACK_SIZE));
+    if (read_len == 0) return false;
     ptr += read_len;
     current_len += read_len;
   }
@@ -33,9 +35,11 @@ inline static void do_recv_img() {
   server._reserved = 0;
   server.content_len = 0;
   write_data((uint8_t*)&server, sizeof(server));
+
+  return true;
 }
 
-inline static void do_send_img() {
+inline static bool do_send_img() {
   printf("#%d: send img, size: %d x %d\n", pack_cnt, client.data.img_size.width,
          client.data.img_size.height);
   uint8_t* ptr = out_img;
@@ -45,35 +49,43 @@ inline static void do_send_img() {
   server.status = 'o' + ('k' << 8);
   server._reserved = 0;
   server.content_len = total_len;
-  write_data((uint8_t*)&server, sizeof(server));
-
   uint32_t current_len = 0, write_len;
+  
+  write_len = write_data((uint8_t*)&server, sizeof(server));
+  if (write_len == 0) return false;
+
   while (current_len < total_len) {
     write_len = write_data(ptr, min(total_len - current_len, MAX_PACK_SIZE));
+    if (write_len == 0) return false;
     ptr += write_len;
     current_len += write_len;
   }
+
+  return true;
 }
 
-inline static void do_write_arg() {
-  printf("#%d: write arg, addr: %x, data: %x\n", pack_cnt, client.data.arg.addr,
+inline static bool do_write_arg() {
+  printf("#%d: writ arg, addr: %x, data: %x\n", pack_cnt, client.data.arg.addr,
          client.data.arg.data);
   IP_set(client.data.arg.addr, client.data.arg.data);
   server.status = 'o' + ('k' << 8);
   server._reserved = 0;
   server.content_len = 0;
-  write_data((uint8_t*)&server, sizeof(server));
+  int len = write_data((uint8_t*)&server, sizeof(server));
+  return len == sizeof(server);
 }
 
-inline static void do_read_arg() {
+inline static bool do_read_arg() {
   uint32_t data = IP_get(client.data.arg.addr);
   printf("#%d: read arg, addr: %x, data: %x\n", pack_cnt, client.data.arg.addr,
          data);
   server.status = 'o' + ('k' << 8);
   server._reserved = 0;
   server.content_len = 4;
-  write_data((uint8_t*)&server, sizeof(server));
-  write_data((uint8_t*)&data, 4);
+  int len = write_data((uint8_t*)&server, sizeof(server));
+  if (len != sizeof(server)) return false;
+  len = write_data((uint8_t*)&data, 4);
+  return len == 4;
 }
 
 void worker_main() {
@@ -84,11 +96,14 @@ void worker_main() {
   start_server();
   printf("server start\n");
 
+  bool client_connected;
+
   while (1) {
     printf("waiting for client\n");
     accept_client();
+    client_connected = true;
 
-    while (1) {
+    while (client_connected) {
       uint32_t len = read_data((uint8_t*)&client, sizeof(client));
       ++pack_cnt;
       if (len != sizeof(client)) {
@@ -96,25 +111,25 @@ void worker_main() {
             "read client failed, want %ld bytes, but get %d bytes. "
             "Disconnect.\n",
             sizeof(client), len);
-        close_client();
         break;
       }
       switch (client.identifier) {
         case ID_WRITE_IMG:
-          do_recv_img(client);
+          client_connected = do_recv_img(client);
           break;
         case ID_READ_IMG:
-          do_send_img(client);
+        	client_connected = do_send_img(client);
           break;
         case ID_WRITE_ARG:
-          do_write_arg(client);
+        	client_connected = do_write_arg(client);
           break;
         case ID_READ_ARG:
-          do_read_arg(client);
+        	client_connected = do_read_arg(client);
           break;
         default:
           break;
       }
     }
+    close_client();
   }
 }
