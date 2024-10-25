@@ -10,6 +10,7 @@ import lib.bus.csb.CSB
 import lib.bus.csb.CSBConfig
 import lib.adaptor.AxiLite2CSB
 import lib.bus.regif.CSBBusInterface
+import lib.utils.XilinxBusTagger
 
 
 // Hardware definition
@@ -34,6 +35,8 @@ case class AxiLiteRegs(config: Config) extends Component {
   }
 
   noIoPrefix()
+
+  XilinxBusTagger.tag(io.axilite, "axilite")
 
   val csb = CSB(CSBConfig(config.axiLiteAddrWidth, config.axiLiteDataWidth))
 
