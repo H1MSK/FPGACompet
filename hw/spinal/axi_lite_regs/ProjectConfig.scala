@@ -1,9 +1,9 @@
-package projectname
+package axi_lite_regs
 
 import spinal.core._
 import spinal.core.sim._
 
-object Config {
+object ProjectConfig {
   def spinal = SpinalConfig(
     targetDirectory = "hw/gen",
     defaultConfigForClockDomains = ClockDomainConfig(
