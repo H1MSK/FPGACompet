@@ -73,6 +73,9 @@ uint32_t read_data(uint8_t* data, uint32_t len) {
 }
 
 uint32_t write_data(const uint8_t* data, uint32_t len) {
+  // printf("Sending %d bytes of data:", len);
+  // for (int i = 0; i < len; ++i)
+  //   printf("%d%c", data[i], ",\n"[i + 1 == len]);
   int n = send(connect_fd, data, len, 0);
   if (n < 0) {
     printf("Error sending data: %s(errno: %d)\n", strerror(errno), errno);

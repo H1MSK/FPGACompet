@@ -26,6 +26,7 @@ typedef struct ClientPackHeader {
 
 typedef struct ServerPackHeader {
   uint16_t status;
+  uint16_t _reserved;
   uint32_t content_len;
 } ServerPackHeader;
 

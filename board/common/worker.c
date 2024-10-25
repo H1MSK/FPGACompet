@@ -7,6 +7,8 @@
 uint8_t in_img[MAX_IMG_SIZE];
 uint8_t out_img[MAX_IMG_SIZE];
 
+static uint32_t pack_cnt;
+
 static ClientPackHeader client;
 static ServerPackHeader server;
 
@@ -17,7 +19,7 @@ inline static uint32_t min(uint32_t a, uint32_t b) {
 inline static void do_recv_img() {
   uint8_t* ptr = in_img;
   uint32_t total_len = client.content_len;
-  printf("recv img, size: %d x %d, content length: %d\n",
+  printf("#%d: recv img, size: %d x %d, content length: %d\n", pack_cnt,
          client.data.img_size.width, client.data.img_size.height, total_len);
 
   uint32_t current_len = 0, read_len;
@@ -28,18 +30,20 @@ inline static void do_recv_img() {
   }
 
   server.status = 'o' + ('k' << 8);
+  server._reserved = 0;
   server.content_len = 0;
   write_data((uint8_t*)&server, sizeof(server));
 }
 
 inline static void do_send_img() {
-  printf("send img, size: %d x %d\n", client.data.img_size.width,
+  printf("#%d: send img, size: %d x %d\n", pack_cnt, client.data.img_size.width,
          client.data.img_size.height);
   uint8_t* ptr = out_img;
 
   uint32_t total_len = 1024 * 1024;
 
   server.status = 'o' + ('k' << 8);
+  server._reserved = 0;
   server.content_len = total_len;
   write_data((uint8_t*)&server, sizeof(server));
 
@@ -52,18 +56,21 @@ inline static void do_send_img() {
 }
 
 inline static void do_write_arg() {
-  printf("write arg, addr: %x, data: %x\n", client.data.arg.addr,
+  printf("#%d: write arg, addr: %x, data: %x\n", pack_cnt, client.data.arg.addr,
          client.data.arg.data);
   IP_set(client.data.arg.addr, client.data.arg.data);
   server.status = 'o' + ('k' << 8);
+  server._reserved = 0;
   server.content_len = 0;
   write_data((uint8_t*)&server, sizeof(server));
 }
 
 inline static void do_read_arg() {
   uint32_t data = IP_get(client.data.arg.addr);
-  printf("read arg, addr: %x, data: %x\n", client.data.arg.addr, data);
+  printf("#%d: read arg, addr: %x, data: %x\n", pack_cnt, client.data.arg.addr,
+         data);
   server.status = 'o' + ('k' << 8);
+  server._reserved = 0;
   server.content_len = 4;
   write_data((uint8_t*)&server, sizeof(server));
   write_data((uint8_t*)&data, 4);
@@ -80,9 +87,10 @@ void worker_main() {
   while (1) {
     printf("waiting for client\n");
     accept_client();
-    
+
     while (1) {
       uint32_t len = read_data((uint8_t*)&client, sizeof(client));
+      ++pack_cnt;
       if (len != sizeof(client)) {
         printf(
             "read client failed, want %ld bytes, but get %d bytes. "
