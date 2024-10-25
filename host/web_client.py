@@ -11,20 +11,34 @@ def connect(host = "localhost", port = 10240):
   _sock.connect((host, port))
 
 def write_img(img: List[int]):
+  
   content = bytes(img)
-  header = struct.pack('<IHHII', WRITE_IMG, 1024, 1024, 0, len(content))
+  header = struct.pack('<IHHII', ID_WRITE_IMG, 1024, 1024, 0, len(content))
   buf = header + content
-  print(f"Write img, header: {header}")
-  _sock.send(buf, )
-  resp = _sock.recv(2)
-  assert resp == b'ok'
+  
+  print(f"Write img, sent header: {header}")
+  
+  _sock.send(buf)
+  resp = _sock.recv(6)
+  
+  print(f"recv header: {resp}")
+  
+  (c0, c1, len) = struct.unpack('<ccI', resp)
+  assert c0 == ord('o') and c1 == ord('k') and len == 0
 
 def read_img():
-  buf = struct.pack('<IHHiI', READ_IMG, 1024, 1024, 0, 0)
-  print(f"Read img, header: {buf}")
+  buf = struct.pack('<IHHiI', ID_READ_IMG, 1024, 1024, 0, 0)
+  
+  print(f"Read img, sent header: {buf}")
+  
   _sock.send(buf)
-  resp = _sock.recv(2)
-  assert resp == b'ok'
+  resp = _sock.recv(6)
+  
+  print(f"recv header: {resp}")
+  
+  (c0, c1, len) = struct.unpack('<ccI', resp)
+  assert c0 == ord('o') and c1 == ord('k') and len == 1024 * 1024 * 1
+  
   img = []
   cur_len = 0
   total_len = 1024 * 1024 * 1
@@ -36,18 +50,29 @@ def read_img():
   
 def write_arg(addr: int, data: int):
   assert 0 <= addr < 1024
-  buf = struct.pack('<IiiI', WRITE_ARG, addr, data, 0)
-  print(f"Write arg, header: {buf}")
-  _sock.send(buf)
-  resp = _sock.recv(2)
-  assert resp == b'ok'
+  buf = struct.pack('<IiiI', ID_WRITE_ARG, addr, data, 0)
   
+  print(f"Write arg, sent header: {buf}")
+  
+  _sock.send(buf)
+  resp = _sock.recv(6)
+  
+  print(f"recv header: {resp}")
+  
+  (c0, c1, len) = struct.unpack('<ccI', resp)
+  assert c0 == ord('o') and c1 == ord('k') and len == 0
+
 def read_arg(addr: int):
   assert 0 <= addr < 1024
-  buf = struct.pack('<IiiI', READ_ARG, addr, 0, 0)
-  print(f"Read arg, header: {buf}")
+  buf = struct.pack('<IiiI', ID_READ_ARG, addr, 0, 0)
+  print(f"Read arg, sent header: {buf}")
   _sock.send(buf)
-  resp = _sock.recv(2)
-  assert resp == b'ok'
+  resp = _sock.recv(6)
+  
+  print(f"recv header: {resp}")
+  
+  (c0, c1, len) = struct.unpack('<ccI', resp)
+  assert c0 == ord('o') and c1 == ord('k') and len == 4
+  
   resp = _sock.recv(4)
   return struct.unpack('<I', resp)[0]
