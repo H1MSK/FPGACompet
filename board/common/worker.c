@@ -20,7 +20,7 @@ inline static uint32_t min(uint32_t a, uint32_t b) {
 inline static bool do_recv_img() {
   uint8_t* ptr = in_img;
   uint32_t total_len = client.content_len;
-  printf("#%d: recv img, size: %d x %d, content length: %d\n", pack_cnt,
+  printf("#%lu: recv img, size: %d x %d, content length: %lu\n", pack_cnt,
          client.data.img_size.width, client.data.img_size.height, total_len);
 
   uint32_t current_len = 0, read_len;
@@ -40,7 +40,7 @@ inline static bool do_recv_img() {
 }
 
 inline static bool do_send_img() {
-  printf("#%d: send img, size: %d x %d\n", pack_cnt, client.data.img_size.width,
+  printf("#%lu: send img, size: %d x %d\n", pack_cnt, client.data.img_size.width,
          client.data.img_size.height);
   uint8_t* ptr = out_img;
 
@@ -65,7 +65,7 @@ inline static bool do_send_img() {
 }
 
 inline static bool do_write_arg() {
-  printf("#%d: writ arg, addr: %x, data: %x\n", pack_cnt, client.data.arg.addr,
+  printf("#%lu: writ arg, addr: 0x%lx, data: 0x%lx\n", pack_cnt, client.data.arg.addr,
          client.data.arg.data);
   IP_set(client.data.arg.addr, client.data.arg.data);
   server.status = 'o' + ('k' << 8);
@@ -77,7 +77,7 @@ inline static bool do_write_arg() {
 
 inline static bool do_read_arg() {
   uint32_t data = IP_get(client.data.arg.addr);
-  printf("#%d: read arg, addr: %x, data: %x\n", pack_cnt, client.data.arg.addr,
+  printf("#%lu: read arg, addr: 0x%lx, data: 0x%lx\n", pack_cnt, client.data.arg.addr,
          data);
   server.status = 'o' + ('k' << 8);
   server._reserved = 0;
@@ -108,7 +108,7 @@ void worker_main() {
       ++pack_cnt;
       if (len != sizeof(client)) {
         printf(
-            "read client failed, want %ld bytes, but get %d bytes. "
+            "read client failed, want %u bytes, but get %lu bytes. "
             "Disconnect.\n",
             sizeof(client), len);
         break;
