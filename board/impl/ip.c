@@ -148,6 +148,9 @@ void IP_set(uint32_t addr, uint32_t val) {
   assert(XPAR_AXILITEREGS_0_BASEADDR <= actual_addr &&
          XPAR_AXILITEREGS_0_HIGHADDR >= actual_addr);
   Xil_Out32(actual_addr, val);
+
+  // When client requests to run, start the dma
+  if (addr == 0 && val == 1) IP_process(1024, 1024, in_img, out_img);
 }
 
 uint32_t IP_get(uint32_t addr) {
