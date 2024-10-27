@@ -1,6 +1,6 @@
 // Generator : SpinalHDL v1.10.2a    git head : a348a60b7e8b6a455c72e1536ec3d74a2ea16935
 // Component : AxiLiteRegs
-// Git hash  : a82dd8b9d9d1452e3943e982672463bab69ccaf6
+// Git hash  : ac106a508d16e27cfe6f32162015da1ba0ee7336
 
 `timescale 1ns/1ps 
 module AxiLiteRegs (
@@ -36,7 +36,7 @@ module AxiLiteRegs (
   output wire [7:0]    out_thres_0,
   output wire [7:0]    out_thres_1,
   input  wire          clk,
-  input  wire          reset
+  input  wire          resetn
 );
 
   wire                adaptor_io_axi_lite_aw_ready;
@@ -135,7 +135,7 @@ module AxiLiteRegs (
     .io_csb_resp_valid           (csb_resp_valid                          ), //i
     .io_csb_resp_payload_rdata   (csb_resp_payload_rdata[31:0]            ), //i
     .clk                         (clk                                     ), //i
-    .reset                       (reset                                   )  //i
+    .resetn                      (resetn                                  )  //i
   );
   assign axilite_aw_ready = adaptor_io_axi_lite_aw_ready;
   assign axilite_w_ready = adaptor_io_axi_lite_w_ready;
@@ -191,8 +191,8 @@ module AxiLiteRegs (
   assign out_busy = busy;
   assign busif_bus_rderr = busif_reg_rderr;
   assign busif_bus_rdata = busif_reg_rdata;
-  always @(posedge clk or posedge reset) begin
-    if(reset) begin
+  always @(posedge clk or negedge resetn) begin
+    if(!resetn) begin
       busif_reg_rderr <= 1'b0;
       busif_reg_rdata <= 32'h0;
       _zz_csb_resp_valid <= 1'b0;

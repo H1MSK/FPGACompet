@@ -8,7 +8,8 @@ object ProjectConfig {
     targetDirectory = "hw/gen",
     oneFilePerComponent = true,
     defaultConfigForClockDomains = ClockDomainConfig(
-      resetActiveLevel = HIGH
+      resetActiveLevel = LOW,
+      resetKind = ASYNC
     ),
     onlyStdLogicVectorAtTopLevelIo = true
   )

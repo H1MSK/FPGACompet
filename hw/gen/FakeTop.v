@@ -1,6 +1,6 @@
 // Generator : SpinalHDL v1.10.2a    git head : a348a60b7e8b6a455c72e1536ec3d74a2ea16935
 // Component : FakeTop
-// Git hash  : ac0494d18a5b48ded8fc83c7b055311a95923fb8
+// Git hash  : ac106a508d16e27cfe6f32162015da1ba0ee7336
 
 `timescale 1ns/1ps 
 module FakeTop (
@@ -15,7 +15,7 @@ module FakeTop (
   output wire [3:0]    io_o_payload_keep,
   output wire          io_o_payload_last,
   input  wire          clk,
-  input  wire          reset
+  input  wire          resetn
 );
 
   wire                down_i_ready;
@@ -46,7 +46,7 @@ module FakeTop (
     .o_payload_keep (down_o_payload_keep     ), //o
     .o_payload_last (down_o_payload_last     ), //o
     .clk            (clk                     ), //i
-    .reset          (reset                   )  //i
+    .resetn         (resetn                  )  //i
   );
   AxiStreamWidthAdaptorI8O32 up (
     .i_valid        (mid_valid              ), //i
@@ -60,7 +60,7 @@ module FakeTop (
     .o_payload_keep (up_o_payload_keep[3:0] ), //o
     .o_payload_last (up_o_payload_last      ), //o
     .clk            (clk                    ), //i
-    .reset          (reset                  )  //i
+    .resetn         (resetn                 )  //i
   );
   assign io_i_ready = down_i_ready;
   assign mid_valid = down_o_valid;

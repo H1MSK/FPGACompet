@@ -1,6 +1,6 @@
 // Generator : SpinalHDL v1.10.2a    git head : a348a60b7e8b6a455c72e1536ec3d74a2ea16935
 // Component : AxiLite2CSB
-// Git hash  : 63b75f185f26fe15a84e9942e45776cf97ccb4c3
+// Git hash  : ac106a508d16e27cfe6f32162015da1ba0ee7336
 
 `timescale 1ns/1ps 
 module AxiLite2CSB (
@@ -31,7 +31,7 @@ module AxiLite2CSB (
   input  wire          io_csb_resp_valid,
   input  wire [31:0]   io_csb_resp_payload_rdata,
   input  wire          clk,
-  input  wire          reset
+  input  wire          resetn
 );
   localparam fsm_enumDef_BOOT = 4'd0;
   localparam fsm_enumDef_wait_axi_cmd = 4'd1;
@@ -366,8 +366,8 @@ module AxiLite2CSB (
     end
   end
 
-  always @(posedge clk or posedge reset) begin
-    if(reset) begin
+  always @(posedge clk or negedge resetn) begin
+    if(!resetn) begin
       fsm_stateReg <= fsm_enumDef_BOOT;
     end else begin
       `ifndef SYNTHESIS

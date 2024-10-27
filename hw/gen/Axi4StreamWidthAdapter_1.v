@@ -1,6 +1,6 @@
 // Generator : SpinalHDL v1.10.2a    git head : a348a60b7e8b6a455c72e1536ec3d74a2ea16935
 // Component : Axi4StreamWidthAdapter_1
-// Git hash  : ac0494d18a5b48ded8fc83c7b055311a95923fb8
+// Git hash  : ac106a508d16e27cfe6f32162015da1ba0ee7336
 
 `timescale 1ns/1ps 
 module Axi4StreamWidthAdapter_1 (
@@ -15,7 +15,7 @@ module Axi4StreamWidthAdapter_1 (
   output wire [0:0]    io_axis_m_payload_keep,
   output wire          io_axis_m_payload_last,
   input  wire          clk,
-  input  wire          reset
+  input  wire          resetn
 );
 
   reg        [2:0]    _zz__zz_writeBufferValid_3;
@@ -1515,8 +1515,8 @@ module Axi4StreamWidthAdapter_1 (
   assign io_axis_m_payload_data = outBuffer_payload_data;
   assign io_axis_m_payload_keep = outBuffer_payload_keep;
   assign io_axis_m_payload_last = outBuffer_payload_last;
-  always @(posedge clk or posedge reset) begin
-    if(reset) begin
+  always @(posedge clk or negedge resetn) begin
+    if(!resetn) begin
       buffer_keep <= _zz_buffer_keep;
       bufferValid <= 8'h0;
       bufferLast <= 1'b0;

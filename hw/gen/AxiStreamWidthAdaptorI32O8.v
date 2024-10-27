@@ -1,6 +1,6 @@
 // Generator : SpinalHDL v1.10.2a    git head : a348a60b7e8b6a455c72e1536ec3d74a2ea16935
 // Component : AxiStreamWidthAdaptorI32O8
-// Git hash  : ac0494d18a5b48ded8fc83c7b055311a95923fb8
+// Git hash  : ac106a508d16e27cfe6f32162015da1ba0ee7336
 
 `timescale 1ns/1ps 
 module AxiStreamWidthAdaptorI32O8 (
@@ -15,7 +15,7 @@ module AxiStreamWidthAdaptorI32O8 (
   (* X_INTERFACE_INFO = "xilinx.com:interface:axis:1.0 out TKEEP" *) output wire [0:0]    o_payload_keep,
   (* X_INTERFACE_INFO = "xilinx.com:interface:axis:1.0 out TLAST" *) output wire          o_payload_last,
   input  wire          clk,
-  input  wire          reset
+  input  wire          resetn
 );
 
   wire                axi4StreamWidthAdapter_2_io_axis_s_ready;
@@ -36,7 +36,7 @@ module AxiStreamWidthAdaptorI32O8 (
     .io_axis_m_payload_keep (axi4StreamWidthAdapter_2_io_axis_m_payload_keep     ), //o
     .io_axis_m_payload_last (axi4StreamWidthAdapter_2_io_axis_m_payload_last     ), //o
     .clk                    (clk                                                 ), //i
-    .reset                  (reset                                               )  //i
+    .resetn                 (resetn                                              )  //i
   );
   assign i_ready = axi4StreamWidthAdapter_2_io_axis_s_ready;
   assign o_valid = axi4StreamWidthAdapter_2_io_axis_m_valid;
