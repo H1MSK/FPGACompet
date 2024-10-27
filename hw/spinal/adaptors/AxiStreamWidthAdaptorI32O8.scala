@@ -9,8 +9,8 @@ import spinal.lib.bus.amba4.axis.Axi4StreamWidthAdapter
 
 case class AxiStreamWidthAdaptorI32O8() extends Component {
   val io = new Bundle {
-    val i = slave(Axi4Stream(Axi4StreamConfig(dataWidth = 32, useKeep = true, useLast = true)))
-    val o = master(Axi4Stream(Axi4StreamConfig(dataWidth = 8, useKeep = true, useLast = true)))
+    val i = slave(Axi4Stream(Axi4StreamConfig(dataWidth = 4, useKeep = true, useLast = true)))
+    val o = master(Axi4Stream(Axi4StreamConfig(dataWidth = 1, useKeep = true, useLast = true)))
   }
 
   noIoPrefix()
