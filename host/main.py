@@ -1,6 +1,7 @@
 from web_client import *
 import numpy as np
 import cv2
+from params import apply_gaussian_filter, apply_threshold
 
 def main():
   print("start")
@@ -8,6 +9,10 @@ def main():
   print("connected")
   for case in range(2):
     print(f"Case #{case}:")
+    
+    apply_threshold(1, 64)
+    apply_gaussian_filter()
+    
     img_in: np.ndarray = cv2.imread("./test_in.png", cv2.IMREAD_GRAYSCALE)
     print(f"image read from disk, shape: {img_in.shape}")
     write_img(img_in.flatten().tolist())

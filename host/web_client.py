@@ -9,8 +9,13 @@ def connect(host = "localhost", port = 10240):
   global _sock
   _sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
   _sock.connect((host, port))
+  
+def disconnect():
+  global _sock
+  _sock.close()
 
 def write_img(img: List[int]):
+  global _sock
   
   content = bytes(img)
   header = struct.pack('<IHHII', ID_WRITE_IMG, 1024, 1024, 0, len(content))
@@ -27,6 +32,7 @@ def write_img(img: List[int]):
   assert c0 == b'o' and c1 == b'k' and content_len == 0
 
 def read_img():
+  global _sock
   buf = struct.pack('<IHHiI', ID_READ_IMG, 1024, 1024, 0, 0)
   
   print(f"Read img, sent")# f" header: {buf}")
@@ -49,6 +55,7 @@ def read_img():
   return img
   
 def write_arg(addr: int, data: int):
+  global _sock
   assert 0 <= addr < 1024
   buf = struct.pack('<IiiI', ID_WRITE_ARG, addr, data, 0)
   
@@ -63,6 +70,7 @@ def write_arg(addr: int, data: int):
   assert c0 == b'o' and c1 == b'k' and content_len == 0
 
 def read_arg(addr: int):
+  global _sock
   assert 0 <= addr < 1024
   buf = struct.pack('<IiiI', ID_READ_ARG, addr, 0, 0)
   print(f"Read arg, sent")# f" header: {buf}")
