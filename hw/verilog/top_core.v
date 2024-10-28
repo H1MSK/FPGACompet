@@ -4,7 +4,7 @@ module top_core(
 	input			rst_n,
 
 	input[7:0]		axi_data_in,
-	input[3:0]		axi_keep,
+	input			axi_keep,
 	input			axi_last,
 	input			axi_valid,
 	input			dualth_axi_ready,
@@ -22,7 +22,8 @@ module top_core(
 	output			gauss_axi_ready,
 	output[7:0]		dualth_axi_dout,
 	output			dualth_axi_valid,
-	output			dualth_axi_last
+	output			dualth_axi_last,
+	output			dualth_axi_keep
 );
 
 wire[7:0]		gauss_ram1_rdata;
@@ -84,6 +85,8 @@ wire[10:0]	dualth_ram2_waddr;
 wire[10:0]	dualth_ram2_raddr;
 wire[7:0]	dualth_gray_out_dly;
 wire		dualth_ovalid;
+
+assign dualth_axi_keep = 1;
 
 gauss		u_gauss(
 	.clk		(clk			),
