@@ -11,7 +11,7 @@ def main():
     print(f"Case #{case}:")
     
     apply_threshold(1, 64)
-    apply_gaussian_filter()
+    apply_gaussian_filter(1, 3)
     
     img_in: np.ndarray = cv2.imread("./test_in.png", cv2.IMREAD_GRAYSCALE)
     print(f"image read from disk, shape: {img_in.shape}")
