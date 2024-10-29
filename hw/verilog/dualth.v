@@ -28,6 +28,13 @@ module dualth(
 
 reg[7:0]		ram1_rdata_dly1;
 reg[7:0]		ram2_rdata_dly1;
+reg		en_dly1;
+reg		en_dly2;
+reg		en_dly3;
+reg		en_dly4;
+reg		en_dly5;
+reg		en_dly6;
+reg		en_dly7;
 
 reg[7:0]	gray_out;
 
@@ -36,12 +43,33 @@ reg[1:0]	swn;	//11 strong 01 weak 00 not
 reg[10:0]	cnt_vld;
 reg		dualth_ovalid;
 
+
 reg[12:0]	cnt_last;
 
 //input delay
-always@(posedge clk) begin
-	ram1_rdata_dly1	<= ram1_rdata;
-	ram2_rdata_dly1	<= ram2_rdata;
+always@(posedge clk or rst_n) begin
+	if(~rst_n) begin
+		ram1_rdata_dly1		<= 'b0;
+		ram2_rdata_dly1		<= 'b0;
+		en_dly1			<= 'b0;
+		en_dly2			<= 'b0;
+		en_dly3			<= 'b0;
+		en_dly4			<= 'b0;
+		en_dly5			<= 'b0;
+		en_dly6			<= 'b0;
+		en_dly7			<= 'b0;
+	end
+	else begin
+		ram1_rdata_dly1		<= ram1_rdata;
+		ram2_rdata_dly1		<= ram2_rdata;
+		en_dly1			<= en_dly;
+		en_dly2			<= en_dly1;
+		en_dly3			<= en_dly2;
+		en_dly4			<= en_dly3;
+		en_dly5			<= en_dly4;
+		en_dly6			<= en_dly5;
+		en_dly7			<= en_dly6;
+	end
 end
 
 //dual threshold comparing
@@ -198,7 +226,7 @@ always@(posedge clk or negedge rst_n) begin
 	end
 end
 
-assign axi_valid = en && dualth_ovalid;
+assign axi_valid = en_dly7 && dualth_ovalid;
 
 always@(posedge clk or negedge rst_n) begin
 	if(~rst_n) begin
