@@ -59,7 +59,7 @@ def write_arg(addr: int, data: int):
   assert 0 <= addr < 1024
   buf = struct.pack('<IiiI', ID_WRITE_ARG, addr, data, 0)
   
-  print(f"Write arg@{addr}:{data}, sent")
+  print(f"Write arg@{addr:x}:{data}, sent")
   
   _sock.send(buf)
   resp = _sock.recv(8)
@@ -73,7 +73,7 @@ def read_arg(addr: int):
   global _sock
   assert 0 <= addr < 1024
   buf = struct.pack('<IiiI', ID_READ_ARG, addr, 0, 0)
-  print(f"Read arg@{addr}, sent")# f" header: {buf}")
+  print(f"Read arg@{addr:x}, sent")# f" header: {buf}")
   _sock.send(buf)
   resp = _sock.recv(8)
   

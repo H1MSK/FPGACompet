@@ -68,7 +68,7 @@ inline static bool do_send_img() {
 }
 
 inline static bool do_write_arg() {
-  printf("#%lu: writ arg, addr: 0x%lx, data: 0x%lx\n", pack_cnt,
+  printf("#%lu: writ arg, addr: 0x%lx, data: %ld\n", pack_cnt,
          client.data.arg.addr, client.data.arg.data);
   IP_set(client.data.arg.addr, client.data.arg.data);
   server.status = 'o' + ('k' << 8);
@@ -80,7 +80,7 @@ inline static bool do_write_arg() {
 
 inline static bool do_read_arg() {
   uint32_t data = IP_get(client.data.arg.addr);
-  printf("#%lu: read arg, addr: 0x%lx, data: 0x%lx\n", pack_cnt,
+  printf("#%lu: read arg, addr: 0x%lx, data: %ld\n", pack_cnt,
          client.data.arg.addr, data);
   server.status = 'o' + ('k' << 8);
   server._reserved = 0;

@@ -31,7 +31,7 @@ def apply_gaussian_filter(sigma, size):
   coeff = gauss2d_kernel_coeff(size, sigma)
   
   # 量化
-  coeff = (round(x * 256) for x in coeff)
+  coeff = [round(x * 256) for x in coeff]
   
   # 依次写入
   start_addr = 0x100
