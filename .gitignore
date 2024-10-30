@@ -1,5 +1,6 @@
 board/build
 
+__pycache__
 host/.venv
-host/__pycache__
+host/config
 host/test_out.png
