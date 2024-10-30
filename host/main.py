@@ -7,21 +7,28 @@ def main():
   print("start")
   connect()
   print("connected")
-  for case in range(2):
+  for case in range(1):
     print(f"Case #{case}:")
     
     apply_threshold(1, 64)
     apply_gaussian_filter(1, 3)
     
+    input()
+    
     img_in: np.ndarray = cv2.imread("./test_in.png", cv2.IMREAD_GRAYSCALE)
     print(f"image read from disk, shape: {img_in.shape}")
     write_img(img_in.flatten().tolist())
     print("image sent to FPGA")
+    
+    input()
     write_arg(0x00, 0x01)
     print("starting computation")
     while read_arg(0x01) != 0x01:
       pass
     print("computation finished")
+    
+    input()
+
     img_out: List[int] = read_img()
     print("image received from FPGA")
     img_out = np.array(img_out).reshape(img_in.shape)
