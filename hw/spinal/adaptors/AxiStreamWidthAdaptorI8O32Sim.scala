@@ -9,7 +9,7 @@ import spinal.core.sim._
 import spinal.lib.bus.amba4.axis.sim.{Axi4StreamMaster, Axi4StreamSlave}
 
 object AxiStreamWidthAdaptorI8O32Sim extends App {
-  ProjectConfig.sim.compile(AxiStreamWidthAdaptorI8O32()).doSim { dut =>
+  project.ProjectConfig.sim.compile(AxiStreamWidthAdaptorI8O32()).doSim { dut =>
     val stream_master = Axi4StreamMaster(dut.io.i, dut.clockDomain)
     val stream_slave = Axi4StreamSlave(dut.io.o, dut.clockDomain)
     dut.clockDomain.forkStimulus(period = 10)

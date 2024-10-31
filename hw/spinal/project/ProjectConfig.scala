@@ -1,4 +1,4 @@
-package adaptors
+package project
 
 import spinal.core._
 import spinal.core.sim._

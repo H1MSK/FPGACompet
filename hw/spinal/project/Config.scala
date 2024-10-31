@@ -1,4 +1,4 @@
-package axi_lite_regs
+package project
 
 case class Config(
   axiLiteAddrWidth: Int = 14,
