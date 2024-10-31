@@ -48,7 +48,7 @@ reg		dualth_ovalid;
 reg[12:0]	cnt_last;
 
 //input delay
-always@(posedge clk or rst_n) begin
+always@(posedge clk or negedge rst_n) begin
 	if(~rst_n) begin
 		ram1_rdata_dly1		<= 'b0;
 		ram2_rdata_dly1		<= 'b0;
