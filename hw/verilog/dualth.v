@@ -35,6 +35,7 @@ reg		en_dly4;
 reg		en_dly5;
 reg		en_dly6;
 reg		en_dly7;
+reg		en_dly8;
 
 reg[7:0]	gray_out;
 
@@ -52,23 +53,11 @@ always@(posedge clk or rst_n) begin
 		ram1_rdata_dly1		<= 'b0;
 		ram2_rdata_dly1		<= 'b0;
 		en_dly1			<= 'b0;
-		en_dly2			<= 'b0;
-		en_dly3			<= 'b0;
-		en_dly4			<= 'b0;
-		en_dly5			<= 'b0;
-		en_dly6			<= 'b0;
-		en_dly7			<= 'b0;
 	end
 	else begin
 		ram1_rdata_dly1		<= ram1_rdata;
 		ram2_rdata_dly1		<= ram2_rdata;
-		en_dly1			<= en_dly;
-		en_dly2			<= en_dly1;
-		en_dly3			<= en_dly2;
-		en_dly4			<= en_dly3;
-		en_dly5			<= en_dly4;
-		en_dly6			<= en_dly5;
-		en_dly7			<= en_dly6;
+		en_dly1			<= en;
 	end
 end
 
@@ -226,7 +215,7 @@ always@(posedge clk or negedge rst_n) begin
 	end
 end
 
-assign axi_valid = en_dly7 && dualth_ovalid;
+assign axi_valid = en_dly1 && dualth_ovalid;
 
 always@(posedge clk or negedge rst_n) begin
 	if(~rst_n) begin

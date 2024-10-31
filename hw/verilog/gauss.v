@@ -56,9 +56,39 @@ reg[7:0]		ram4_rdata_dly1;
 reg[10:0]		cnt_ovld;
 reg[20:0]		cnt_pix;	//enough last indicates a pic over
 
-wire[20:0]		gray_temp;
+reg[20:0]		gray_temp;
+
 reg[20:0]		gray_temp1;
 reg[20:0]		gray_temp2;
+
+reg[20:0]		gray_temp11;
+reg[20:0]		gray_temp12;
+reg[20:0]		gray_temp21;
+reg[20:0]		gray_temp22;
+
+reg[20:0]		gray_temp111;
+reg[20:0]		gray_temp112;
+reg[20:0]		gray_temp121;
+reg[20:0]		gray_temp122;
+reg[20:0]		gray_temp211;
+reg[20:0]		gray_temp212;
+reg[20:0]		gray_temp220;
+
+reg[20:0]		gray_temp1111;
+reg[20:0]		gray_temp1112;
+reg[20:0]		gray_temp1121;
+reg[20:0]		gray_temp1122;
+reg[20:0]		gray_temp1211;
+reg[20:0]		gray_temp1212;
+reg[20:0]		gray_temp1221;
+reg[20:0]		gray_temp1222;
+reg[20:0]		gray_temp2111;
+reg[20:0]		gray_temp2112;
+reg[20:0]		gray_temp2121;
+reg[20:0]		gray_temp2122;
+reg[20:0]		gray_temp2200;
+
+
 
 //shifter, store 25 pixel gray
 reg[7:0]		gray_00;
@@ -273,22 +303,74 @@ end
 //gray out
 always@(posedge clk or negedge rst_n) begin
 	if(~rst_n) begin
+		gray_temp	<= 'b0;
+
 		gray_temp1	<= 'b0;
 		gray_temp2	<= 'b0;
+
+		gray_temp11	<= 'b0;
+		gray_temp12	<= 'b0;
+		gray_temp21	<= 'b0;
+		gray_temp22	<= 'b0;
+
+		gray_temp111	<= 'b0;
+		gray_temp112	<= 'b0;
+		gray_temp121	<= 'b0;
+		gray_temp122	<= 'b0;
+		gray_temp211	<= 'b0;
+		gray_temp212	<= 'b0;
+		gray_temp220	<= 'b0;
+
+		gray_temp1111	<= 'b0;
+		gray_temp1112	<= 'b0;
+		gray_temp1121	<= 'b0;
+		gray_temp1122	<= 'b0;
+		gray_temp1211	<= 'b0;
+		gray_temp1212	<= 'b0;
+		gray_temp1221	<= 'b0;
+		gray_temp1222	<= 'b0;
+		gray_temp2111	<= 'b0;
+		gray_temp2112	<= 'b0;
+		gray_temp2121	<= 'b0;
+		gray_temp2122	<= 'b0;
+		gray_temp2200	<= 'b0;
 	end
 	else begin
 		if(en) begin
-			gray_temp1	<= gray_00 * coe_00 + gray_01 * coe_01 + gray_02 * coe_02 + gray_03 * coe_03 + gray_04 * coe_04
-					+ gray_10 * coe_10 + gray_11 * coe_11 + gray_12 * coe_12 + gray_13 * coe_13 + gray_14 * coe_14
-					+ gray_20 * coe_20 + gray_21 * coe_21 + gray_22 * coe_22;
-			gray_temp2	<= gray_23 * coe_23 + gray_24 * coe_24
-					+ gray_30 * coe_30 + gray_31 * coe_31 + gray_32 * coe_32 + gray_33 * coe_33 + gray_34 * coe_34
-					+ gray_40 * coe_40 + gray_41 * coe_41 + gray_42 * coe_42 + gray_43 * coe_43 + gray_44 * coe_44;
+			gray_temp	<= gray_temp1 + gray_temp2;
+
+			gray_temp1	<= gray_temp11 + gray_temp12;
+			gray_temp2	<= gray_temp21 + gray_temp22;
+
+			gray_temp11	<= gray_temp111 + gray_temp112;
+			gray_temp12	<= gray_temp121 + gray_temp122;
+			gray_temp21	<= gray_temp211 + gray_temp212;
+			gray_temp22	<= gray_temp220;
+
+			gray_temp111	<= gray_temp1111 + gray_temp1112;
+			gray_temp112	<= gray_temp1121 + gray_temp1122;
+			gray_temp121	<= gray_temp1211 + gray_temp1212;
+			gray_temp122	<= gray_temp1221 + gray_temp1222;
+			gray_temp211	<= gray_temp2111 + gray_temp2112;
+			gray_temp212	<= gray_temp2121 + gray_temp2122;
+			gray_temp220	<= gray_temp2200;
+
+			gray_temp1111	<= gray_00 * coe_00 + gray_01 * coe_01;
+			gray_temp1112	<= gray_02 * coe_02 + gray_03 * coe_03;
+			gray_temp1121	<= gray_04 * coe_04 + gray_10 * coe_10;
+			gray_temp1122	<= gray_11 * coe_11 + gray_12 * coe_12;
+			gray_temp1211	<= gray_13 * coe_13 + gray_14 * coe_14;
+			gray_temp1212	<= gray_20 * coe_20 + gray_21 * coe_21;
+			gray_temp1221	<= gray_22 * coe_22 + gray_23 * coe_23;
+			gray_temp1222	<= gray_24 * coe_24 + gray_30 * coe_30;
+			gray_temp2111	<= gray_31 * coe_31 + gray_32 * coe_32;
+			gray_temp2112	<= gray_33 * coe_33 + gray_34 * coe_34;
+			gray_temp2121	<= gray_40 * coe_40 + gray_41 * coe_41;
+			gray_temp2122	<= gray_42 * coe_42 + gray_43 * coe_43;
+			gray_temp2200	<= gray_44 * coe_44;
 		end
 	end
 end
-
-assign gray_temp = gray_temp1 + gray_temp2;
 
 always@(posedge clk or negedge rst_n) begin
 	if(~rst_n) begin
