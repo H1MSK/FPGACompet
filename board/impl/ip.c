@@ -64,9 +64,10 @@ void thread_data_io(bool to_device,
   uint8_t* ptr = data;
   const char* s = lut_s[to_device];
   uint8_t dir = lut_dir[to_device];
-  uint32_t max_packet_len = *lut_max_len_ptr[to_device];
+  uint32_t max_packet_len = *lut_max_len_ptr[to_device] & (~0x3);
   while (opt_len > 0) {
     uint32_t this_len = min(max_packet_len, opt_len);
+    xil_printf("%s device: pack len = %d, rest = %d\r\n", s, this_len, opt_len);
 
     Xil_DCacheFlushRange((UINTPTR)ptr, this_len);
     int Status = XAxiDma_SimpleTransfer(&AxiDma, (UINTPTR)ptr, this_len, dir);
@@ -85,6 +86,7 @@ void thread_data_io(bool to_device,
     opt_len -= this_len;
     ptr += this_len;
   }
+  xil_printf("%s device: finish\r\n", s);
   *finish = true;
   vTaskDelete(NULL);
 }

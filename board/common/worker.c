@@ -105,6 +105,7 @@ void worker_main() {
   while (1) {
     printf("waiting for client\n");
     accept_client();
+    printf("connected\n");
     client_connected = true;
 
     while (client_connected) {
