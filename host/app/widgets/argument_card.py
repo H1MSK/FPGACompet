@@ -1,63 +1,307 @@
-from PySide6.QtCore import Qt
-from PySide6.QtGui import QValidator
+import functools
+from PySide6.QtCore import Qt, Signal, Slot, QObject
+from PySide6.QtGui import QDoubleValidator
 from PySide6.QtWidgets import (
-    QHBoxLayout, QGridLayout
+    QHBoxLayout, QVBoxLayout, QGridLayout, QWidget
 )
 from qfluentwidgets import (
     GroupHeaderCardWidget, PushButton, LineEdit, IconWidget,
     BodyLabel, InfoBarIcon, PrimaryPushButton, FluentIcon, SpinBox,
-    InfoBar, Slider, MessageBoxBase, SubtitleLabel, ComboBox
+    InfoBar, Slider, MessageBoxBase, SubtitleLabel, ComboBox, CompactDoubleSpinBox
 )
 from qfluentwidgets import FluentIcon as FIF
 from app.config import config
 import web_client
+import math
 
-class ParamSetMessageBox(MessageBoxBase):
-    def __init__(self, parent = None):
+class KernelObject(QObject):
+    kernelChanged = Signal(int, float)
+    def __init__(self, parent = None) -> None:
         super().__init__(parent)
-        self.title_label = SubtitleLabel("参数设置")
-        self.viewLayout.addWidget(self.title_label)
+        self.normalized = False
+        self.kernel_00 = 1.0
+        self.kernel_01 = 0.0
+        self.kernel_02 = 0.0
+        self.kernel_11 = 0.0
+        self.kernel_12 = 0.0
+        self.kernel_22 = 0.0
         
-        self.mode = "gauss"
+    def copyDataFrom(self, obj):
+        for i in range(6):
+            self.setKernel(i, obj.getKernel(i))
+        self.normalized = obj.normalized
         
-        self.mode_combo = ComboBox(self)
-        self.mode_combo.addItems(["高斯", "自定义"])
+    def getKernel(self, pos: int):
+        return [self.kernel_00, self.kernel_01, self.kernel_02, self.kernel_11, self.kernel_12, self.kernel_22][pos]
+    
+    @Slot(int, float)
+    def setKernel(self, pos: int, value: float):
+        assert 0 <= value <= 1.0
+        self.normalized = False
+        if pos == 0:
+            if self.kernel_00 != value:
+                self.kernel_00 = value
+                self.kernelChanged.emit(0, self.kernel_00)
+        elif pos == 1:
+            if self.kernel_01 != value:
+                self.kernel_01 = value
+                self.kernelChanged.emit(1, self.kernel_01)
+        elif pos == 2:
+            if self.kernel_02 != value:
+                self.kernel_02 = value
+                self.kernelChanged.emit(2, self.kernel_02)
+        elif pos == 3:
+            if self.kernel_11 != value:
+                self.kernel_11 = value
+                self.kernelChanged.emit(3, self.kernel_11)
+        elif pos == 4:
+            if self.kernel_12 != value:
+                self.kernel_12 = value
+                self.kernelChanged.emit(4, self.kernel_12)
+        elif pos == 5:
+            if self.kernel_22 != value:
+                self.kernel_22 = value
+                self.kernelChanged.emit(5, self.kernel_22)
+        else:
+            raise ValueError(f"Invalid pos: {pos}")
         
-        self.
-        self.threshold_sigma_validator = None # todo
-        self.filter_gauss_sigma_edit = LineEdit(self)
-        self.filter_gauss_sigma_edit.setValidator(self.threshold_sigma_validator)
-        self.filter_gauss_sigma_edit.textChanged.connect(lambda: self.)
+    @Slot()
+    def normalizeKernel(self):
+        kernels = [self.kernel_00, self.kernel_01, self.kernel_02, self.kernel_11, self.kernel_12, self.kernel_22]
+        sumup = sum(kernels) * 4 - 3 * kernels[0] + 4 * kernels[4]
+        print(f"kernels: {kernels}, sumup: {sumup}")
+        norm = [round(k / sumup, 4) for k in kernels]
+        print(f"normalized: {norm}")
+        for i, k in enumerate(norm):
+            self.setKernel(i, k)
+        self.normalized = True
+        
+
+class GaussianKernelWidget(QWidget):
+    gaussSizeChanged = Signal(int)
+    gaussSigmaChanged = Signal(float)
+    def __init__(self, kernel_data: KernelObject, parent = None):
+        super().__init__(parent)
+        self.kernel_data = kernel_data
+        self.kernel_data.setKernel(0, 1.0)
+        self.kernel_data.setKernel(1, 0.0)
+        self.kernel_data.setKernel(2, 0.0)
+        self.kernel_data.setKernel(3, 0.0)
+        self.kernel_data.setKernel(4, 0.0)
+        self.kernel_data.setKernel(5, 0.0)
+        
+        self.gauss_size = 3
+        self.gauss_sigma = 1.0
+        
+        self.size_label = BodyLabel("高斯核尺寸：")
+        self.size_combo = ComboBox(self)
+        self.size_combo.addItems(["3", "5"])
+        self.size_combo.currentIndexChanged.connect(self.setGaussSize)
+        
+        self.sigma_label = BodyLabel("高斯标准差：")
+        self.sigma_edit = LineEdit(self)
+        self.sigma_edit.setText(str(self.gauss_sigma))
+        self.validator = QDoubleValidator(0, 1, 4, self.sigma_edit)
+        self.sigma_edit.setValidator(self.validator)
+        self.sigma_edit.textChanged.connect(lambda x: self.setGaussSigma(float(x)))
         
         self.grid_layout = QGridLayout(self)
-        self.grid_layout.addWidget(BodyLabel("模式："), 0, 0)
-        self.grid_layout.addWidget()
+        self.grid_layout.addWidget(self.size_label, 0, 0)
+        self.grid_layout.addWidget(self.size_combo, 0, 1)
+        self.grid_layout.addWidget(self.sigma_label, 1, 0)
+        self.grid_layout.addWidget(self.sigma_edit, 1, 1)
+        self.setLayout(self.grid_layout)
+        
+        
+        self.gaussSizeChanged.connect(self.updateGaussianKernel)
+        self.gaussSigmaChanged.connect(self.updateGaussianKernel)
+        
+        self.updateGaussianKernel()
+        
+    @Slot(int)
+    def setGaussSize(self, index: int):
+        if index == 0:
+            self.gauss_size = 3
+        elif index == 1:
+            self.gauss_size = 5
+        self.gaussSizeChanged.emit(self.gauss_size)
+    
+    @Slot(float)
+    def setGaussSigma(self, sigma: float):
+        if sigma == 0:
+            print("sigma = 0, ignore")
+            return
+        self.gauss_sigma = float(sigma)
+        self.gaussSigmaChanged.emit(self.gauss_sigma)
+        
+    @Slot()
+    def updateGaussianKernel(self):
+        sigma = self.gauss_sigma
+        def gauss(x, y, sigma):
+            return (1 / (2 * math.pi * sigma ** 2)) * math.exp((- (x ** 2 + y ** 2) / (2 * sigma ** 2)))
+        kernels = [
+            gauss(0, 0, sigma),
+            gauss(0, 1, sigma),
+            0,
+            gauss(1, 1, sigma),
+            0, 0
+        ]
+        if self.gauss_size == 5:
+            kernels[2] = gauss(0, 2, sigma)
+            kernels[4] = gauss(1, 2, sigma)
+            kernels[5] = gauss(2, 2, sigma)
+        for i in range(6):
+            kernels[i] = round(kernels[i], 4)
+        for i, k in enumerate(kernels):
+            self.kernel_data.setKernel(i, k)
+        
+class CustomKernelWidget(QWidget):
+    indexes = [12, 7, 2, 6, 1, 0]
+    def __init__(self, kernel_data: KernelObject, parent=None) -> None:
+        super().__init__(parent)
+        self.kernel_data = kernel_data
+        self.label = BodyLabel("参数值：")
+        self.boxes = [CompactDoubleSpinBox(self) for _ in range(25)]
+        self.validator = QDoubleValidator(0, 10, 4, self)
+        self.normalize_button = PushButton("归一化")
+        for box in self.boxes:
+            box.setRange(0, 100)
+            box.setDecimals(4)
+            box.setSingleStep(0.0001)
+        for i, idx in enumerate(CustomKernelWidget.indexes):
+            self.boxes[idx].setValue(self.kernel_data.getKernel(i))
+            self.boxes[idx].valueChanged.connect(
+                functools.partial(
+                    lambda kernel_idx, val: self.kernel_data.setKernel(kernel_idx, val),
+                    i))
+            self.kernel_data.kernelChanged.connect(self.onKernelDataChanged)
+            
+        self.grid_layout = QGridLayout(self)
+        for row in range(5):
+            for col in range(5):
+                self.grid_layout.addWidget(self.boxes[row * 5 + col], row, col)
+                if row <= 2 and col <= 2 and row <= col:
+                    print(f"{row} {col} is editable")
+                    continue
+                kernel_row = row - 2
+                kernel_col = col - 2
+                if kernel_row > 0: kernel_row = -kernel_row
+                if kernel_col > 0: kernel_col = -kernel_col
+                if kernel_row > kernel_col:
+                    kernel_row, kernel_col = kernel_col, kernel_row
+                ref_row = kernel_row + 2
+                ref_col = kernel_col + 2
+                self.boxes[ref_row * 5 + ref_col].valueChanged.connect(
+                    functools.partial(
+                        lambda pos, val: self.boxes[pos].setValue(val),
+                        row * 5 + col))
+                print(f"{row} {col} is linked to {ref_row} {ref_col}")
+                self.boxes[row * 5 + col].setEnabled(False)
+                self.boxes[row * 5 + col].setValue(
+                    self.boxes[ref_row * 5 + ref_col].value()
+                )
+        self.setLayout(self.grid_layout)
+
+    
+    @Slot(int, float)
+    def onKernelDataChanged(self, kernel, val):
+        edit = self.boxes[CustomKernelWidget.indexes[kernel]]
+        edit.setValue(val)
+        edit.editingFinished.emit()
+
+class KernelSetMessageBox(MessageBoxBase):
+    def __init__(self, kernel_data: KernelObject, parent = None):
+        super().__init__(parent)
+        
+        self.mode = 1
+        self.gauss_sigma = 1.0
+        
+        self.title_label = SubtitleLabel("参数设置")
+        
+        self.mode_widget = QWidget(self)
+        self.mode_layout = QHBoxLayout(self.mode_widget)
+        
+        self.mode_label = BodyLabel("卷积核类型：")
+        self.mode_combo = ComboBox(self)
+        self.mode_combo.addItems(["高斯", "自定义"])
+        self.mode_combo.setCurrentIndex(self.mode)
+        self.mode_combo.currentIndexChanged.connect(self.setMode)
+        
+        self.mode_layout.addWidget(self.mode_label)
+        self.mode_layout.addWidget(self.mode_combo, 1)
+        
+        self.kernel_label = BodyLabel("核参数：")
+        
+        self.kernel_data = kernel_data
+        
+        self.filter_gauss_sigma_widget = GaussianKernelWidget(self.kernel_data, self)
+        self.custom_kernel_widget = CustomKernelWidget(self.kernel_data, self)
+        self.normalize_button = PushButton("归一化")
+        self.normalize_button.clicked.connect(self.kernel_data.normalizeKernel)
+        
+        self.kernel_text = BodyLabel("核参数")
+        self.kernel_data.kernelChanged.connect(self.updateKernelText)
+        
+        self.viewLayout.addWidget(self.title_label)
+        self.viewLayout.addWidget(self.mode_widget)
+        # self.viewLayout.addWidget(self.kernel_label)
+        self.viewLayout.addWidget(self.filter_gauss_sigma_widget)
+        self.viewLayout.addWidget(self.custom_kernel_widget)
+        self.viewLayout.addWidget(self.normalize_button)
+        self.viewLayout.addWidget(self.kernel_text)
+        
+        self.updateKernelText()
+        self.setMode(self.mode_combo.currentIndex())
+        
+    @Slot()
+    def updateKernelText(self):
+        self.kernel_text.setText(
+            f"核参数：[{self.kernel_data.kernel_00:.4f}, {self.kernel_data.kernel_01:.4f}, "
+            f"{self.kernel_data.kernel_02:.4f}, {self.kernel_data.kernel_11:.4f}, "
+            f"{self.kernel_data.kernel_12:.4f}, {self.kernel_data.kernel_22:.4f}]")
+        
+    @Slot(int)
+    def setMode(self, mode_index: int):
+        if mode_index == 0: # Gauss
+            self.filter_gauss_sigma_widget.setVisible(True)
+            self.custom_kernel_widget.setVisible(False)
+            self.mode = 0
+        elif mode_index == 1: # Custom
+            self.filter_gauss_sigma_widget.setVisible(False)
+            self.custom_kernel_widget.setVisible(True)
+            self.mode = 1
+
 
 class ArgumentCard(GroupHeaderCardWidget):
+    thresholdChanged = Signal(int, int)
+    kernelDataChanged = Signal()
     def __init__(self, parent=None):
         super().__init__(parent)
         
-        self.threshold = [0, 255]
+        self.threshold = [8, 64]
+        
+        self.kernel_data = KernelObject(self)
         
         self.setTitle("参数配置")
         self.setBorderRadius(8)
 
-        self.hint_icon = IconWidget(FluentIcon.APPLICATION)
-        self.apply_button = PrimaryPushButton(FluentIcon.UP, "应用")
-        self.discard_button = PushButton(FluentIcon.DOWNLOAD, "读取")
+        self.hint_icon = IconWidget(InfoBarIcon.INFORMATION)
+        self.hint_label = BodyLabel("配置IP参数")
+        self.apply_button = PrimaryPushButton(FluentIcon.UP, "上传")
+        self.discard_button = PushButton(FluentIcon.DOWNLOAD, "下载")
         self.bottom_layout = QHBoxLayout()
         
-        self.threshold_low_slider = Slider(self)
+        self.threshold_low_slider = Slider(Qt.Horizontal, self)
         self.threshold_low_slider.setFixedWidth(320)
         self.threshold_low_slider.setRange(0, 255)
-        self.threshold_low_slider.setValue(1)
+        self.threshold_low_slider.setValue(self.threshold[0])
         
-        self.threshold_high_slider = Slider(self)
+        self.threshold_high_slider = Slider(Qt.Horizontal, self)
         self.threshold_high_slider.setFixedWidth(320)
         self.threshold_high_slider.setRange(0, 255)
-        self.threshold_high_slider.setValue(64)
+        self.threshold_high_slider.setValue(self.threshold[1])
         
-        self.param_set_button = PushButton("参数设置")
+        self.kernel_set_button = PushButton("设置...")
 
         # 设置底部工具栏布局
         self.hint_icon.setFixedSize(16, 16)
@@ -71,41 +315,75 @@ class ArgumentCard(GroupHeaderCardWidget):
         self.bottom_layout.setAlignment(Qt.AlignVCenter)
 
         # 添加组件到分组中
-        self.addGroup(FIF.GLOBE, "主机地址", "FPGA 设备的网络地址", self.addr_edit).setSeparatorVisible(True)
-        self.addGroup(FIF.LINK, "端口号", "FPGA 设备的 TCP 端口号", self.port_spin).setSeparatorVisible(True)
+        self.threshold_low_group = self.addGroup(FIF.SETTING, "低阈值", str(self.threshold[0]), self.threshold_low_slider)
+        self.threshold_low_group.setSeparatorVisible(True)
+
+        self.threshold_high_group = self.addGroup(FIF.SETTING, "高阈值", str(self.threshold[1]), self.threshold_high_slider)
+        self.threshold_high_group.setSeparatorVisible(True)
+        
+        self.kernel_set_group = self.addGroup(FIF.SETTING, "卷积核配置", "", self.kernel_set_button)
 
         # 添加底部工具栏
         self.vBoxLayout.addLayout(self.bottom_layout)
 
-        self.updateWidgets()
         
-        
+        self.thresholdChanged.connect(self.updateThresholdGroupContent)
         self.threshold_low_slider.valueChanged.connect(lambda: self.thresholdRangeCheck(0))
         self.threshold_high_slider.valueChanged.connect(lambda: self.thresholdRangeCheck(1))
-        self.param_set_button.clicked.connect(self.openParamSetMessageBox())
-
-        self.apply_button.clicked.connect(lambda: self.applyParameters())
-        self.discard_button.clicked.connect(lambda: self.downloadParameters())
+        self.kernel_set_button.clicked.connect(self.openKernelSetMessageBox)
         
+        self.kernel_data.kernelChanged.connect(self.updateKernelText)
+
+        self.apply_button.clicked.connect(self.applyParameters)
+        self.discard_button.clicked.connect(self.discardParameters)
+        
+        self.updateKernelText()
+        
+    @Slot(int)
     def thresholdRangeCheck(self, index):
         if index == 0:
             self.threshold[0] = self.threshold_low_slider.value()
-            if self.threshold[0] > self.threshold[1]:
-                self.threshold[0] = self.threshold[1]
-                self.threshold_low_slider.setValue(self.threshold[0])
-        else:
-            self.threshold[1] = self.threshold_high_slider.value()
             if self.threshold[1] < self.threshold[0]:
                 self.threshold[1] = self.threshold[0]
                 self.threshold_high_slider.setValue(self.threshold[1])
+        else:
+            self.threshold[1] = self.threshold_high_slider.value()
+            if self.threshold[0] > self.threshold[1]:
+                self.threshold[0] = self.threshold[1]
+                self.threshold_low_slider.setValue(self.threshold[0])
+        self.thresholdChanged.emit(self.threshold[0], self.threshold[1])
 
-    def updateWidgets(self):
-        connect_disable = self.connected
-        self.addr_edit.setDisabled(connect_disable)
-        self.port_spin.setDisabled(connect_disable)
-        self.apply_button.setDisabled(connect_disable)
-        disconnect_disable = not self.connected
-        self.disconnect_button.setDisabled(disconnect_disable)
-
-    def openParamSetMessageBox(self):
+    @Slot()
+    def updateThresholdGroupContent(self):
+        self.threshold_low_group.setContent(str(self.threshold[0]))
+        self.threshold_high_group.setContent(str(self.threshold[1]))
         
+    @Slot()
+    def updateKernelText(self):
+        self.kernel_set_group.setContent(
+            f"核参数：[{self.kernel_data.kernel_00:.4f}, {self.kernel_data.kernel_01:.4f}, "
+            f"{self.kernel_data.kernel_02:.4f}, {self.kernel_data.kernel_11:.4f}, "
+            f"{self.kernel_data.kernel_12:.4f}, {self.kernel_data.kernel_22:.4f}]")
+
+    @Slot()
+    def openKernelSetMessageBox(self):
+        from .main_window import main_window
+        new_data = KernelObject(self)
+        new_data.copyDataFrom(self.kernel_data)
+        box = KernelSetMessageBox(new_data, main_window)
+        if box.exec():
+            self.kernel_data.copyDataFrom(new_data)
+        
+    @Slot()
+    def applyParameters(self):
+        # web_client.write_arg(0x100, self.kernel_data.kernel_00)
+        pass
+    
+    @Slot()
+    def discardParameters(self):
+        pass
+
+    @Slot()
+    def onConnectionStateChanged(self, connected: bool):
+        self.apply_button.setEnabled(connected)
+        self.discard_button.setEnabled(connected)

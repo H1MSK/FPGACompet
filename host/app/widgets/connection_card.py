@@ -1,4 +1,4 @@
-from PySide6.QtCore import Qt, Signal, QTimer
+from PySide6.QtCore import Qt, Signal, Slot, QTimer
 from PySide6.QtWidgets import (
     QHBoxLayout, QApplication
 )
@@ -60,8 +60,9 @@ class ConnectionCard(GroupHeaderCardWidget):
         self.disconnect_button.clicked.connect(self.disconnectFromHost)
         self.connectionStateChanged.connect(self.updateWidgets)
         
-        self.connectionStateChanged.emit(False)
+        QTimer.singleShot(0, lambda: self.connectionStateChanged.emit(False))
         
+    @Slot()
     def connectToHost(self):
         if self.connected: return
         from app.widgets.main_window import main_window
@@ -79,6 +80,7 @@ class ConnectionCard(GroupHeaderCardWidget):
             self.connected = True
             self.connectionStateChanged.emit(self.connected)
         
+    @Slot()
     def disconnectFromHost(self):
         if not self.connected: return
         web_client.disconnect()
@@ -86,6 +88,7 @@ class ConnectionCard(GroupHeaderCardWidget):
         self.connected = False
         self.connectionStateChanged.emit(self.connected)
     
+    @Slot()
     def updateWidgets(self):
         connect_disable = self.connected
         self.addr_edit.setDisabled(connect_disable)
