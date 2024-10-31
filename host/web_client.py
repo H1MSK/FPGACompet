@@ -5,7 +5,7 @@ from constant import *
 
 _sock: socket.socket = None
 
-def connect(host = "localhost", port = 10240):
+def connect(host = "169.254.128.192", port = 10240):
   global _sock
   _sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
   _sock.connect((host, port))
