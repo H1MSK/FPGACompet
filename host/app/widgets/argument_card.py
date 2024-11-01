@@ -1,5 +1,5 @@
 import functools
-from PySide6.QtCore import Qt, Signal, Slot, QObject
+from PySide6.QtCore import Qt, Signal, Slot, QObject, QTimer
 from PySide6.QtGui import QDoubleValidator
 from PySide6.QtWidgets import (
     QHBoxLayout, QVBoxLayout, QGridLayout, QWidget
@@ -33,6 +33,12 @@ class KernelObject(QObject):
         
     def getKernel(self, pos: int):
         return [self.kernel_00, self.kernel_01, self.kernel_02, self.kernel_11, self.kernel_12, self.kernel_22][pos]
+    
+    def getQuantizedKernel(self, pos):
+        return math.floor(self.getKernel(pos) * 256)
+    
+    def setQuantizedKernel(self, pos: int, value: int):
+        self.setKernel(pos, value / 256)
     
     @Slot(int, float)
     def setKernel(self, pos: int, value: float):
@@ -103,7 +109,13 @@ class GaussianKernelWidget(QWidget):
         self.sigma_edit.setText(str(self.gauss_sigma))
         self.validator = QDoubleValidator(0, 1, 4, self.sigma_edit)
         self.sigma_edit.setValidator(self.validator)
-        self.sigma_edit.textChanged.connect(lambda x: self.setGaussSigma(float(x)))
+        @Slot(str)
+        def tryApplyGaussSigma(text: str):
+            try:
+                self.setGaussSigma(float(text))
+            except ValueError:
+                pass
+        self.sigma_edit.textChanged.connect(tryApplyGaussSigma)
         
         self.grid_layout = QGridLayout(self)
         self.grid_layout.addWidget(self.size_label, 0, 0)
@@ -273,14 +285,11 @@ class KernelSetMessageBox(MessageBoxBase):
 
 
 class ArgumentCard(GroupHeaderCardWidget):
-    thresholdChanged = Signal(int, int)
-    kernelDataChanged = Signal()
     def __init__(self, parent=None):
         super().__init__(parent)
         
-        self.threshold = [8, 64]
-        
         self.kernel_data = KernelObject(self)
+        # TODO: set initial data from config.kernel_xx
         
         self.setTitle("参数配置")
         self.setBorderRadius(8)
@@ -294,12 +303,12 @@ class ArgumentCard(GroupHeaderCardWidget):
         self.threshold_low_slider = Slider(Qt.Horizontal, self)
         self.threshold_low_slider.setFixedWidth(320)
         self.threshold_low_slider.setRange(0, 255)
-        self.threshold_low_slider.setValue(self.threshold[0])
+        self.threshold_low_slider.setValue(config.threshold_low.value)
         
         self.threshold_high_slider = Slider(Qt.Horizontal, self)
         self.threshold_high_slider.setFixedWidth(320)
         self.threshold_high_slider.setRange(0, 255)
-        self.threshold_high_slider.setValue(self.threshold[1])
+        self.threshold_high_slider.setValue(config.threshold_high.value)
         
         self.kernel_set_button = PushButton("设置...")
 
@@ -326,40 +335,38 @@ class ArgumentCard(GroupHeaderCardWidget):
         # 添加底部工具栏
         self.vBoxLayout.addLayout(self.bottom_layout)
 
-        
-        self.thresholdChanged.connect(self.updateThresholdGroupContent)
-        self.threshold_low_slider.valueChanged.connect(lambda: self.thresholdRangeCheck(0))
-        self.threshold_high_slider.valueChanged.connect(lambda: self.thresholdRangeCheck(1))
+        config.threshold_low.valueChanged.connect(self.threshold_low_slider.setValue)
+        config.threshold_high.valueChanged.connect(self.threshold_high_slider.setValue)
+        self.threshold_low_slider.valueChanged.connect(lambda x: self.thresholdChanged(0, x))
+        self.threshold_high_slider.valueChanged.connect(lambda x: self.thresholdChanged(1, x))
         self.kernel_set_button.clicked.connect(self.openKernelSetMessageBox)
         
-        self.kernel_data.kernelChanged.connect(self.updateKernelText)
+        self.kernel_data.kernelChanged.connect(self.onKernelChanged)
 
         self.apply_button.clicked.connect(self.applyParameters)
         self.discard_button.clicked.connect(self.discardParameters)
         
-        self.updateKernelText()
+        QTimer.singleShot(0, self.onKernelChanged)
         
-    @Slot(int)
-    def thresholdRangeCheck(self, index):
-        if index == 0:
-            self.threshold[0] = self.threshold_low_slider.value()
-            if self.threshold[1] < self.threshold[0]:
-                self.threshold[1] = self.threshold[0]
-                self.threshold_high_slider.setValue(self.threshold[1])
+    @Slot(int, int)
+    def thresholdChanged(self, index, value):
+        if index == 0: # low value changed, check high value
+            if config.threshold_low.value == value:
+                return
+            config.threshold_low.value = value
+            if config.threshold_high.value < config.threshold_low.value:
+                config.threshold_high.value = config.threshold_low.value
+            self.threshold_low_group.setContent(str(value))
         else:
-            self.threshold[1] = self.threshold_high_slider.value()
-            if self.threshold[0] > self.threshold[1]:
-                self.threshold[0] = self.threshold[1]
-                self.threshold_low_slider.setValue(self.threshold[0])
-        self.thresholdChanged.emit(self.threshold[0], self.threshold[1])
+            if config.threshold_high.value == value:
+                return
+            config.threshold_high.value = value
+            if config.threshold_high.value < config.threshold_low.value:
+                config.threshold_low.value = config.threshold_high.value
+            self.threshold_high_group.setContent(str(value))
 
     @Slot()
-    def updateThresholdGroupContent(self):
-        self.threshold_low_group.setContent(str(self.threshold[0]))
-        self.threshold_high_group.setContent(str(self.threshold[1]))
-        
-    @Slot()
-    def updateKernelText(self):
+    def onKernelChanged(self):
         self.kernel_set_group.setContent(
             f"核参数：[{self.kernel_data.kernel_00:.4f}, {self.kernel_data.kernel_01:.4f}, "
             f"{self.kernel_data.kernel_02:.4f}, {self.kernel_data.kernel_11:.4f}, "
@@ -376,12 +383,17 @@ class ArgumentCard(GroupHeaderCardWidget):
         
     @Slot()
     def applyParameters(self):
-        # web_client.write_arg(0x100, self.kernel_data.kernel_00)
-        pass
+        for i in range(6):
+            web_client.write_arg(0x100 + 4 * i, self.kernel_data.getQuantizedKernel(i))
+        web_client.write_arg(0x80, self.threshold[0])
+        web_client.write_arg(0x84, self.threshold[1])
     
     @Slot()
     def discardParameters(self):
-        pass
+        for i in range(6):
+            self.kernel_data.setQuantizedKernel(i, web_client.read_arg(0x100 + 4 * i))
+        self.threshold_low_slider.setValue(web_client.read_arg(0x80))
+        self.threshold_high_slider.setValue(web_client.read_arg(0x84))
 
     @Slot()
     def onConnectionStateChanged(self, connected: bool):
