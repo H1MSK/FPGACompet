@@ -4,8 +4,8 @@ module plug_sc(
 	input		oready,
 	input[3:0]	state,
 
-	output		iready,
-	output		ovalid
+	output reg	iready,
+	output reg	ovalid
 );
 
 always@* begin

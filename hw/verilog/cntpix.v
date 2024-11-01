@@ -22,7 +22,7 @@ always@(posedge clk or negedge rst_n) begin
 		cnt_pix	<= 'd0;
 	end
 	else begin
-		if(state[1] && state[0]) begin
+		if(state[1] || state[0]) begin
 			if(input_valid && input_ready) begin
 				cnt_pix	<= cnt_pix + 'd1;
 			end

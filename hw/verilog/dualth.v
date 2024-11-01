@@ -61,8 +61,8 @@ always@(posedge clk or negedge rst_n) begin
 		swn	<= 'b10;
 	end
 	else begin
-		if(val_aft_nms_dly < gth) begin
-			if(val_aft_nms_dly < gtl) begin
+		if(val_aft_nms < gth) begin
+			if(val_aft_nms < gtl) begin
 				swn	<= 'b00;
 			end
 			else begin

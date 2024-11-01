@@ -6,8 +6,8 @@ module gauss(
 	input[7:0]		axi_data_in,
 	input[3:0]		axi_keep,
 
-	input[3:0]		state;
-	input			en_1;			//stream controller en
+	input[3:0]		state,
+	input			en_1,			//stream controller en
 
 	input[7:0]		coe_00_in,		//gauss coefficient, 0.xxxx_xxxx
 	input[7:0]		coe_01_in,
@@ -39,10 +39,10 @@ module gauss(
 
 	output reg[7:0]		gray_out,
 	output			gauss_ram_wen,
-	output			edg
+	output reg		edg
 );
 
-wire			en_gauss;
+reg			en_gauss;
 
 reg[7:0]		ram1_rdata_dly1;
 reg[7:0]		ram2_rdata_dly1;

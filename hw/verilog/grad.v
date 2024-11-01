@@ -22,7 +22,7 @@ module grad(
 	output			grad_ram_wen
 );
 
-wire			en_grad;
+reg			en_grad;
 
 reg[7:0]		ram1_rdata_dly1;
 reg[7:0]		ram2_rdata_dly1;
@@ -54,8 +54,6 @@ reg signed[10:0]	gy_abs;
 //grad value and direction
 reg[11:0]		grad_val;
 reg[1:0]		grad_dir;	//4 directions, 00: x axis; 01: 45; 10: y axis; 11: 135
-
-reg[10:0]		cnt_vld;
 
 //input delay
 always@(posedge clk) begin

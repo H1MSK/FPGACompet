@@ -16,22 +16,22 @@ reg[7:0]	gth;
 reg[7:0]	gtl;
 
 wire[7:0]	axi_data_in;
-reg		axi_keep;
-reg		axi_last;
-reg		axi_valid;
-reg		dualth_axi_ready;
+reg		input_axi_keep;
+reg		input_axi_last;
+reg		input_axi_valid;
+reg		output_axi_ready;
 
-wire[7:0]	dualth_axi_dout;
+wire[7:0]	output_axi_dout;
 
 top_core	u_top_core(
 	.clk			(clk			),
 	.rst_n			(rst_n			),
 
 	.axi_data_in		(axi_data_in		),
-	.axi_keep		(axi_keep		),
-	.axi_last		(axi_last		),
-	.axi_valid		(axi_valid		),
-	.dualth_axi_ready	(dualth_axi_ready	),
+	.input_axi_keep		(input_axi_keep		),
+	.input_axi_last		(input_axi_last		),
+	.input_axi_valid	(input_axi_valid	),
+	.output_axi_ready	(output_axi_ready	),
 
 	.coe_00_in		(coe_00_in		),
 	.coe_01_in		(coe_01_in		),
@@ -43,10 +43,10 @@ top_core	u_top_core(
 	.gth			(gth			),
 	.gtl			(gtl			),
 
-	.gauss_axi_ready	(gauss_axi_ready	),
-	.dualth_axi_dout	(dualth_axi_dout	),
-	.dualth_axi_valid	(dualth_axi_valid	),
-	.dualth_axi_last	(dualth_axi_last	)
+	.input_axi_ready	(input_axi_ready	),
+	.output_axi_dout	(output_axi_dout	),
+	.output_axi_valid	(output_axi_valid	),
+	.output_axi_last	(output_axi_last	)
 );
 
 always #1 clk = ~clk;
@@ -56,7 +56,7 @@ integer bb;
 
 assign axi_data_in = mem[i];
 initial begin
-	clk = 0; rst_n = 0; axi_keep = 0; axi_valid = 1; dualth_axi_ready = 1;
+	clk = 0; rst_n = 0; input_axi_keep = 0; input_axi_valid = 1; output_axi_ready = 1; input_axi_last = 0;
 	coe_00_in = 'b100; coe_01_in = 'b100; coe_02_in = 'b100; 
 	coe_11_in = 'b100; coe_12_in = 'b100; coe_22_in = 'b100;
 	gth = 5; gtl = 1;
@@ -81,13 +81,7 @@ initial begin
 
 end
 
-initial begin
-	repeat(4100) begin
-		#510	axi_last = 1;
-		#2	axi_last = 0;
-	end
-end
-
+/*
 initial begin
 	aa = $fopen("E:/DigitalDesign+++++++/competition/data/outcome1026.txt", "w");
 	bb = $fopen("E:/DigitalDesign+++++++/competition/data/axv1026.txt", "w");
@@ -95,8 +89,8 @@ initial begin
 	forever begin
 		#2 begin
 			if(dualth_axi_valid) begin
-				$fwrite(aa, "%b\n", dualth_axi_dout);
-				$fwrite(bb, "%b\n", dualth_axi_valid);
+				$fwrite(aa, "%b\n", output_axi_dout);
+				$fwrite(bb, "%b\n", output__axi_valid);
 			end
 		end
 	end
@@ -106,5 +100,6 @@ initial begin
 		$fclose(bb);
 	end
 end
+*/
 
 endmodule
