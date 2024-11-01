@@ -33,7 +33,7 @@ bin/
 .settings
 .cache-main
 
-#User
+# User
 /*.vhd
 /*.v
 *.cf
@@ -41,7 +41,8 @@ bin/
 *.vcd
 !tester/src/test/resources/*.vhd
 
-
+# SpinalHDL generated files
 simWorkspace/
 tmp/
 null
+*.lst

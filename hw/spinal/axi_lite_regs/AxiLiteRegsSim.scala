@@ -133,7 +133,7 @@ object AxiLiteRegsSim extends App {
     })
   }
 
-  ProjectConfig.sim.compile(AxiLiteRegs(Config())).doSim { dut =>
+  project.ProjectConfig.sim.compile(AxiLiteRegs(project.Config())).doSim { dut =>
     val axilite_master = AxiLite4Master(dut.io.axilite, dut.clockDomain)
     dut.clockDomain.forkStimulus(period = 10)
     dut.clockDomain.forkSimSpeedPrinter()

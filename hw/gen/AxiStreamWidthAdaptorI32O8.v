@@ -4,16 +4,16 @@
 
 `timescale 1ns/1ps 
 module AxiStreamWidthAdaptorI32O8 (
-  (* X_INTERFACE_INFO = "xilinx.com:interface:axis:1.0 in TVALID" *) input  wire          i_valid,
-  (* X_INTERFACE_INFO = "xilinx.com:interface:axis:1.0 in TREADY" *) output wire          i_ready,
-  (* X_INTERFACE_INFO = "xilinx.com:interface:axis:1.0 in TDATA" *) input  wire [31:0]   i_payload_data,
-  (* X_INTERFACE_INFO = "xilinx.com:interface:axis:1.0 in TKEEP" *) input  wire [3:0]    i_payload_keep,
-  (* X_INTERFACE_INFO = "xilinx.com:interface:axis:1.0 in TLAST" *) input  wire          i_payload_last,
-  (* X_INTERFACE_INFO = "xilinx.com:interface:axis:1.0 out TVALID" *) output wire          o_valid,
-  (* X_INTERFACE_INFO = "xilinx.com:interface:axis:1.0 out TREADY" *) input  wire          o_ready,
-  (* X_INTERFACE_INFO = "xilinx.com:interface:axis:1.0 out TDATA" *) output wire [7:0]    o_payload_data,
-  (* X_INTERFACE_INFO = "xilinx.com:interface:axis:1.0 out TKEEP" *) output wire [0:0]    o_payload_keep,
-  (* X_INTERFACE_INFO = "xilinx.com:interface:axis:1.0 out TLAST" *) output wire          o_payload_last,
+  (* X_INTERFACE_INFO = "xilinx.com:interface:axis:1.0 sin TVALID" *) input  wire          i_valid,
+  (* X_INTERFACE_INFO = "xilinx.com:interface:axis:1.0 sin TREADY" *) output wire          i_ready,
+  (* X_INTERFACE_INFO = "xilinx.com:interface:axis:1.0 sin TDATA" *) input  wire [31:0]   i_payload_data,
+  (* X_INTERFACE_INFO = "xilinx.com:interface:axis:1.0 sin TKEEP" *) input  wire [3:0]    i_payload_keep,
+  (* X_INTERFACE_INFO = "xilinx.com:interface:axis:1.0 sin TLAST" *) input  wire          i_payload_last,
+  (* X_INTERFACE_INFO = "xilinx.com:interface:axis:1.0 sout TVALID" *) output wire          o_valid,
+  (* X_INTERFACE_INFO = "xilinx.com:interface:axis:1.0 sout TREADY" *) input  wire          o_ready,
+  (* X_INTERFACE_INFO = "xilinx.com:interface:axis:1.0 sout TDATA" *) output wire [7:0]    o_payload_data,
+  (* X_INTERFACE_INFO = "xilinx.com:interface:axis:1.0 sout TKEEP" *) output wire [0:0]    o_payload_keep,
+  (* X_INTERFACE_INFO = "xilinx.com:interface:axis:1.0 sout TLAST" *) output wire          o_payload_last,
   input  wire          clk,
   input  wire          resetn
 );

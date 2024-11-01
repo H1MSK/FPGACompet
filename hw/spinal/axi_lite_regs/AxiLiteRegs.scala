@@ -14,7 +14,7 @@ import lib.utils.XilinxBusTagger
 
 
 // Hardware definition
-case class AxiLiteRegs(config: Config) extends Component {
+case class AxiLiteRegs(config: project.Config) extends Component {
   val io = new Bundle {
     val axilite = slave(
       AxiLite4(
