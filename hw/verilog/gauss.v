@@ -5,9 +5,9 @@ module gauss(
 
 	input[7:0]		axi_data_in,
 	input[3:0]		axi_keep,
-	input			axi_last,
-	input			axi_valid,
-	input			dualth_axi_ready,
+
+	input[3:0]		state;
+	input			en_1;			//stream controller en
 
 	input[7:0]		coe_00_in,		//gauss coefficient, 0.xxxx_xxxx
 	input[7:0]		coe_01_in,
@@ -38,23 +38,16 @@ module gauss(
 	output[10:0]		ram4_raddr,
 
 	output reg[7:0]		gray_out,
-	output reg		ovalid,
-	output			gauss_axi_ready,
-	output			gauss_ram_wen
+	output			gauss_ram_wen,
+	output			edg
 );
 
-wire			en;
-
-reg			axi_valid_dly1;
-reg			axi_valid_dly2;
+wire			en_gauss;
 
 reg[7:0]		ram1_rdata_dly1;
 reg[7:0]		ram2_rdata_dly1;
 reg[7:0]		ram3_rdata_dly1;
 reg[7:0]		ram4_rdata_dly1;
-
-reg[10:0]		cnt_ovld;
-reg[20:0]		cnt_pix;	//enough last indicates a pic over
 
 reg[20:0]		gray_temp;
 
@@ -87,8 +80,6 @@ reg[20:0]		gray_temp2112;
 reg[20:0]		gray_temp2121;
 reg[20:0]		gray_temp2122;
 reg[20:0]		gray_temp2200;
-
-
 
 //shifter, store 25 pixel gray
 reg[7:0]		gray_00;
@@ -152,19 +143,24 @@ reg[7:0]		coe_42;
 reg[7:0]		coe_43;
 reg[7:0]		coe_44;
 
-//input delay
+//ram delay
 always@(posedge clk) begin
 	ram1_rdata_dly1	<= ram1_rdata;
 	ram2_rdata_dly1	<= ram2_rdata;
 	ram3_rdata_dly1	<= ram3_rdata;
 	ram4_rdata_dly1	<= ram4_rdata;
-	axi_valid_dly1	<= axi_valid;
-	axi_valid_dly2	<= axi_valid_dly1;
 end
 
-//module enable
-assign en = (axi_valid || ovalid) && gauss_axi_ready;
-assign gauss_axi_ready = dualth_axi_ready;
+//gauss enable
+always@* begin
+	case(state)
+		'b0001:		en_gauss = en_1;
+		'b0010:		en_gauss = en_1;
+		'b0100:		en_gauss = 'b1;
+		'b1000: 	en_gauss = 'b0;
+		default:	en_gauss = 'b0;
+	endcase
+end
 
 //shifter
 always@(posedge clk or negedge rst_n) begin
@@ -200,7 +196,7 @@ always@(posedge clk or negedge rst_n) begin
 		gray_44	<= 'b0;
 	end
 	else begin
-		if(en) begin
+		if(en_gauss) begin
 			gray_00	<= gray_01;
 			gray_01	<= gray_02;
 			gray_02	<= gray_03;
@@ -229,7 +225,7 @@ always@(posedge clk or negedge rst_n) begin
 			gray_41	<= gray_42;
 			gray_42	<= gray_43;
 			gray_43	<= gray_44;
-			gray_44	<= axi_data_in;
+			gray_44	<= (state[1] || state[0]) ? axi_data_in : 'b0;	// = data_in when pic input is not done
 		end
 	end
 end
@@ -336,17 +332,17 @@ always@(posedge clk or negedge rst_n) begin
 		gray_temp2200	<= 'b0;
 	end
 	else begin
-		if(en) begin
+		if(en_gauss) begin
 			gray_temp	<= gray_temp1 + gray_temp2;
-
+		
 			gray_temp1	<= gray_temp11 + gray_temp12;
 			gray_temp2	<= gray_temp21 + gray_temp22;
-
+		
 			gray_temp11	<= gray_temp111 + gray_temp112;
 			gray_temp12	<= gray_temp121 + gray_temp122;
 			gray_temp21	<= gray_temp211 + gray_temp212;
 			gray_temp22	<= gray_temp220;
-
+		
 			gray_temp111	<= gray_temp1111 + gray_temp1112;
 			gray_temp112	<= gray_temp1121 + gray_temp1122;
 			gray_temp121	<= gray_temp1211 + gray_temp1212;
@@ -354,7 +350,7 @@ always@(posedge clk or negedge rst_n) begin
 			gray_temp211	<= gray_temp2111 + gray_temp2112;
 			gray_temp212	<= gray_temp2121 + gray_temp2122;
 			gray_temp220	<= gray_temp2200;
-
+		
 			gray_temp1111	<= gray_00 * coe_00 + gray_01 * coe_01;
 			gray_temp1112	<= gray_02 * coe_02 + gray_03 * coe_03;
 			gray_temp1121	<= gray_04 * coe_04 + gray_10 * coe_10;
@@ -377,13 +373,8 @@ always@(posedge clk or negedge rst_n) begin
 		gray_out	<= 'b0;
 	end
 	else begin
-		if(cnt_ovld < 'd1025) begin
-			if((ram1_raddr == 'd1) || (ram1_raddr == 'd2)) begin	//edge
-				gray_out	<= 'b0;
-			end
-			else begin
-				gray_out	<= gray_temp[15:8];
-			end
+		if(en_gauss) begin
+			gray_out	<= gray_temp[15:8];
 		end
 		else begin
 			gray_out	<= 'b0;
@@ -398,7 +389,7 @@ always@(posedge clk or negedge rst_n) begin
 		ram1_raddr	<= 'd1;
 	end
 	else begin
-		if(en) begin
+		if(en_gauss) begin
 			if(ram1_waddr < 'd1025) begin
 				ram1_waddr	<= ram1_waddr + 1;
 			end
@@ -426,68 +417,19 @@ assign ram3_wdata = ram4_rdata;
 assign ram3_waddr = ram1_waddr;
 assign ram3_raddr = ram1_raddr;
 
-assign ram4_wdata = (cnt_pix < 'd2**20) ? axi_data_in : 'b0;
+assign ram4_wdata = (state[1] || state[0]) ? axi_data_in : 'b0;	//when pic input is not done
 assign ram4_waddr = ram1_waddr;
 assign ram4_raddr = ram1_raddr;
 
-assign gauss_ram_wen = en;
+assign gauss_ram_wen = en_gauss;
 
-//output valid
-always@(posedge clk or negedge rst_n) begin
-	if(~rst_n) begin
-		cnt_ovld	<= 'd0;
+//edge: gauss 1026*1024, grad 1025*1024. disable gauss when 1026
+always@* begin
+	if(ram1_raddr == 'd6) begin
+		edg	= 'b1;
 	end
 	else begin
-		if(en) begin
-			if(cnt_ovld < 'd1031) begin
-				if(ram1_raddr == 'd3) begin
-					cnt_ovld	<= cnt_ovld + 1;
-				end
-			end
-			else begin
-				cnt_ovld	<= 'd0;
-			end
-		end
-	end
-end
-
-always@(posedge clk or negedge rst_n) begin
-	if(~rst_n) begin
-		cnt_pix	<= 'd0;
-	end
-	else begin
-		if(axi_valid) begin
-			cnt_pix	<= cnt_pix + 'd1;
-		end
-	end
-end
-
-always@(posedge clk or negedge rst_n) begin
-	if(~rst_n) begin
-		ovalid	<= 'b0;
-	end
-	else begin
-		if((cnt_ovld >= 'd3) && (cnt_ovld < 'd1031)) begin
-			if(ram1_raddr == 'd1) begin
-				ovalid	<= 'b0;
-			end
-			else begin
-				if(cnt_pix < 'd2**20) begin
-					if(axi_valid_dly2) begin
-						ovalid	<= 'b1;
-					end
-					else begin
-						ovalid	<= 'b0;
-					end
-				end
-				else begin
-					ovalid	<= 'b1;
-				end
-			end
-		end
-		else if(cnt_ovld == 'd1031) begin
-			ovalid	<= 'b0;
-		end
+		edg	= 'b0;
 	end
 end
 

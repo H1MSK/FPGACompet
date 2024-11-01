@@ -4,10 +4,10 @@ module top_core(
 	input			rst_n,
 
 	input[7:0]		axi_data_in,
-	input			axi_keep,
-	input			axi_last,
-	input			axi_valid,
-	input			dualth_axi_ready,
+	input			input_axi_keep,
+	input			input_axi_last,
+	input			input_axi_valid,
+	input			output_axi_ready,
 
 	input[7:0]		coe_00_in,
 	input[7:0]		coe_01_in,
@@ -19,11 +19,11 @@ module top_core(
 	input[7:0]		gth,
 	input[7:0]		gtl,
 
-	output			gauss_axi_ready,
-	output[7:0]		dualth_axi_dout,
-	output			dualth_axi_valid,
-	output			dualth_axi_last,
-	output			dualth_axi_keep
+	output			input_axi_ready,
+	output[7:0]		output_axi_dout,
+	output			output_axi_valid,
+	output			output_axi_last,
+	output			output_axi_keep
 );
 
 wire[7:0]		gauss_ram1_rdata;
@@ -86,7 +86,49 @@ wire[10:0]	dualth_ram2_raddr;
 wire[7:0]	dualth_gray_out_dly;
 wire		dualth_ovalid;
 
-assign dualth_axi_keep = 1;
+assign output_axi_keep = 1;
+
+cntpix		u_cntpix(
+	.clk		(clk			),
+	.rst_n		(rst_n			),
+	.input_valid	(input_axi_valid	),
+	.input_ready	(input_axi_ready	),
+	.input_last	(input_axi_last		),
+	.output_valid	(output_axi_valid	),
+	.output_ready	(output_axi_ready	),
+
+	.state		(state			),
+	.output_last	(output_axi_last	)
+);
+
+StreamController_1	u1_StreamController_1(
+	.ivalid		(sc1_ivalid		),
+	.iready		(sc1_iready		),
+	.ovalid		(sc1_ovalid		),
+	.oready		(sc1_oready		),
+	.en_0		(sc1_en			),
+	.clk		(clk			),
+	.resetn		(rst_n			)
+);
+
+plug_sc			u_plug_sc(
+	.ivalid		(sc1_ovalid		),
+	.oready		(sc2_iready		),
+	.state		(state			),
+
+	.iready		(sc1_oready		),
+	.ovalid		(sc2_ivalid		)
+);
+
+StreamController_1	u2_StreamController_1(
+	.ivalid		(sc2_ivalid		),
+	.iready		(sc2_iready		),
+	.ovalid		(sc2_ovalid		),
+	.oready		(sc2_oready		),
+	.en_0		(sc2_en			),
+	.clk		(clk			),
+	.resetn		(rst_n			)
+);
 
 gauss		u_gauss(
 	.clk		(clk			),
@@ -94,9 +136,9 @@ gauss		u_gauss(
 
 	.axi_data_in	(axi_data_in		),
 	.axi_keep	(),
-	.axi_last	(axi_last		),
-	.axi_valid	(axi_valid		),
-	.dualth_axi_ready(dualth_axi_ready	),
+
+	.state		(state			),
+	.en_1		(sc1_en			),
 
 	.coe_00_in	(coe_00_in		),
 	.coe_01_in	(coe_01_in		),
@@ -127,9 +169,8 @@ gauss		u_gauss(
 	.ram4_raddr	(gauss_ram4_raddr	),
 
 	.gray_out	(gauss_gray_out		),
-	.ovalid		(gauss_ovalid		),
-	.gauss_axi_ready(gauss_axi_ready	),
-	.gauss_ram_wen	(gauss_ram_wen		)
+	.gauss_ram_wen	(gauss_ram_wen		),
+	.edg		(gauss_edg		)
 );
 
 ram8b		u1_ram8b(
@@ -172,7 +213,9 @@ ram8b		u4_ram8b(
 grad		u_grad(
 	.clk		(clk			),
 	.rst_n		(rst_n			),
-	.en		(gauss_ovalid		),
+	.en_1		(sc1_en			),
+	.edg		(gauss_edg		),
+	.state		(state			),
 
 	.gray_in	(gauss_gray_out		),
 	.ram1_rdata	(grad_ram1_rdata	),
@@ -187,7 +230,7 @@ grad		u_grad(
 	.ram2_raddr	(grad_ram2_raddr	),
 
 	.grad_val_dir	(grad_val_dir		),
-	.ovalid		(		)
+	.grad_ram_wen	(grad_ram_wen		)
 );
 
 ram8b		u5_ram8b(
@@ -195,7 +238,7 @@ ram8b		u5_ram8b(
 	.d		(grad_ram1_wdata	),
 	.dpra		(grad_ram1_raddr	),
 	.clk		(clk			),
-	.we		(gauss_ovalid		),
+	.we		(grad_ram_wen		),
 	.dpo		(grad_ram1_rdata	)
 );
 
@@ -204,7 +247,7 @@ ram8b		u6_ram8b(
 	.d		(grad_ram2_wdata	),
 	.dpra		(grad_ram2_raddr	),
 	.clk		(clk			),
-	.we		(gauss_ovalid		),
+	.we		(grad_ram_wen		),
 	.dpo		(grad_ram2_rdata	)
 );
 
@@ -212,7 +255,7 @@ ram8b		u6_ram8b(
 nms		u_nms(
 	.clk		(clk			),
 	.rst_n		(rst_n			),
-	.en		(gauss_ovalid		),
+	.en_1		(sc1_en			),
 
 	.grad_in	(grad_val_dir		),
 	.ram1_rdata	(nms_ram1_rdata		),
@@ -226,8 +269,8 @@ nms		u_nms(
 	.ram2_waddr	(nms_ram2_waddr		),
 	.ram2_raddr	(nms_ram2_raddr		),
 
-	.val_aft_nms_dly(val_aft_nms_dly	),
-	.ovalid		(		)
+	.val_aft_nms_dly(val_aft_nms		),
+	.nms_ram_wen	(nms_ram_wen		)
 );
 
 ram14b		u1_ram14b(
@@ -235,7 +278,7 @@ ram14b		u1_ram14b(
 	.d		(nms_ram1_wdata		),
 	.dpra		(nms_ram1_raddr		),
 	.clk		(clk			),
-	.we		(gauss_ovalid		),
+	.we		(nms_ram_wen		),
 	.dpo		(nms_ram1_rdata		)
 );
 
@@ -244,7 +287,7 @@ ram14b		u2_ram14b(
 	.d		(nms_ram2_wdata		),
 	.dpra		(nms_ram2_raddr		),
 	.clk		(clk			),
-	.we		(gauss_ovalid		),
+	.we		(nms_ram_wen		),
 	.dpo		(nms_ram2_rdata		)
 );
 
@@ -252,13 +295,14 @@ ram14b		u2_ram14b(
 dualth		u_dualth(
 	.clk		(clk			),
 	.rst_n		(rst_n			),
-	.en		(gauss_ovalid		),
-	.dualth_axi_ready(dualth_axi_ready	),
+	.en_1		(sc1_en			),
+	.en_2		(sc2_en			),
+	.state		(state			),
 
 	.gth		(gth			),
 	.gtl		(gtl			),
 
-	.val_aft_nms_dly(val_aft_nms_dly	),
+	.val_aft_nms	(val_aft_nms		),
 	.ram1_rdata	(dualth_ram1_rdata	),
 	.ram2_rdata	(dualth_ram2_rdata	),
 
@@ -270,9 +314,8 @@ dualth		u_dualth(
 	.ram2_raddr	(dualth_ram2_raddr	),
 	.ram2_wdata	(dualth_ram2_wdata	),
 
-	.gray_out_dly	(dualth_axi_dout	),
-	.axi_valid	(dualth_axi_valid	),
-	.axi_last	(dualth_axi_last	)
+	.gray_out	(output_axi_dout	),
+	.dualth_ram_wen	(dualth_ram_wen		)
 );
 
 ram2b		u1_ram2b(

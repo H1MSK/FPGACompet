@@ -2,13 +2,14 @@
 module dualth(
 	input			clk,
 	input			rst_n,
-	input			en,
-	input			dualth_axi_ready,
+	input			en_1,
+	input			en_2,
+	input[3:0]		state,
 
 	input[7:0]		gth,
 	input[7:0]		gtl,
 
-	input[11:0]		val_aft_nms_dly,
+	input[11:0]		val_aft_nms,
 	input[1:0]		ram1_rdata,
 	input[1:0]		ram2_rdata, 
 
@@ -20,45 +21,38 @@ module dualth(
 	output[10:0]		ram2_raddr,
 	output[1:0]		ram2_wdata,
 
-	output reg[7:0]		gray_out_dly,	//axi data output
-	output			axi_valid,
-	output reg		axi_last
+	output reg[7:0]		gray_out,	//axi data output
+	output			dualth_ram_wen
 );
 
+reg			en_buf;
 
 reg[7:0]		ram1_rdata_dly1;
 reg[7:0]		ram2_rdata_dly1;
-reg		en_dly1;
-reg		en_dly2;
-reg		en_dly3;
-reg		en_dly4;
-reg		en_dly5;
-reg		en_dly6;
-reg		en_dly7;
-reg		en_dly8;
 
-reg[7:0]	gray_out;
-
-reg[1:0]	swn;	//11 strong 01 weak 00 not
-
-reg[10:0]	cnt_vld;
-reg		dualth_ovalid;
-
-
-reg[12:0]	cnt_last;
+reg[1:0]		swn;	//11 strong 01 weak 00 not
 
 //input delay
-always@(posedge clk or rst_n) begin
+always@(posedge clk or negedge rst_n) begin
 	if(~rst_n) begin
 		ram1_rdata_dly1		<= 'b0;
 		ram2_rdata_dly1		<= 'b0;
-		en_dly1			<= 'b0;
 	end
 	else begin
 		ram1_rdata_dly1		<= ram1_rdata;
 		ram2_rdata_dly1		<= ram2_rdata;
-		en_dly1			<= en;
 	end
+end
+
+//dualth buf enable
+always@* begin
+	case(state)
+		'b0001:		en_buf = en_1;
+		'b0010:		en_buf = en_1;
+		'b0100:		en_buf = 'b1;
+		'b1000: 	en_buf = 'b0;
+		default:	en_buf = 'b0;
+	endcase
 end
 
 //dual threshold comparing
@@ -106,7 +100,7 @@ always@(posedge clk or negedge rst_n) begin
 		swn_22	<= 'b0;
 	end
 	else begin
-		if(en) begin
+		if(en_buf) begin
 			swn_00	<= swn_01;
 			swn_01	<= swn_02;
 			swn_02	<= ram1_rdata_dly1;
@@ -127,7 +121,7 @@ always@(posedge clk or negedge rst_n) begin
 		ram1_raddr	<= 'd1;
 	end
 	else begin
-		if(en) begin
+		if(en_buf) begin
 			if(ram1_waddr < 'd1024) begin
 				ram1_waddr	<= ram1_waddr + 1;
 			end
@@ -149,6 +143,7 @@ assign ram1_wdata = ram2_rdata;
 assign ram2_wdata = swn;
 assign ram2_waddr = ram1_waddr;
 assign ram2_raddr = ram1_raddr;
+assign dualth_ram_wen = en_buf;
 
 //final output
 always@(posedge clk or negedge rst_n) begin
@@ -156,91 +151,28 @@ always@(posedge clk or negedge rst_n) begin
 		gray_out	<= 'd255;
 	end
 	else begin
-		case(swn_11)
-			2'b00: begin
-				gray_out	<= 'd255;
-			end
-			2'b01: begin
-				if((&swn_00) || (&swn_01) ||(&swn_02) ||(&swn_10) ||(&swn_12) ||(&swn_20) ||(&swn_21) ||(&swn_22)) begin
-					gray_out	<= 'd0;
-				end
-				else begin
+		if(en_2) begin
+			case(swn_11)
+				2'b00: begin
 					gray_out	<= 'd255;
 				end
-			end
-			2'b11: begin
-				gray_out	<= 'd255;
-			end
-			default begin
-				gray_out	<= 'd127;
-			end
-		endcase
-	end
-end
-
-always@(posedge clk) begin
-	gray_out_dly	<= gray_out;
-end
-
-//output valid
-always@(posedge clk or negedge rst_n) begin
-	if(~rst_n) begin
-		cnt_vld	<= 'd0;
-	end
-	else begin
-		if(en) begin
-			if(cnt_vld < 'd1028) begin
-				if(ram1_raddr == 'd12) begin
-					cnt_vld	<= cnt_vld + 1;
+				2'b01: begin
+					if((&swn_00) || (&swn_01) ||(&swn_02) ||(&swn_10) ||(&swn_12) ||(&swn_20) ||(&swn_21) ||(&swn_22)) begin
+						gray_out	<= 'd0;
+					end
+					else begin
+						gray_out	<= 'd255;
+					end
 				end
-			end
-			else begin
-				cnt_vld	<= 'd0;
-			end
+				2'b11: begin
+					gray_out	<= 'd255;
+				end
+				default begin
+					gray_out	<= 'd127;
+				end
+			endcase
 		end
 	end
 end
-
-always@(posedge clk or negedge rst_n) begin
-	if(~rst_n) begin
-		dualth_ovalid	<= 'b0;
-	end
-	else begin
-		if(cnt_vld == 'd4) begin
-			dualth_ovalid	<= 'b1;
-		end
-		else if(cnt_vld == 'd1028) begin
-			dualth_ovalid	<= 'b0;
-		end
-	end
-end
-
-assign axi_valid = en_dly1 && dualth_ovalid;
-
-always@(posedge clk or negedge rst_n) begin
-	if(~rst_n) begin
-		cnt_last	<= 'd0;
-	end
-	else begin
-		if(axi_valid) begin
-			cnt_last	<= cnt_last + 'd1;
-		end
-	end
-end
-
-always@(posedge clk or negedge rst_n) begin
-	if(~rst_n) begin
-		axi_last	<= 'b0;
-	end
-	else begin
-		if(&cnt_last[6:0]) begin
-			axi_last	<= 'b1;
-		end
-		else if(dualth_axi_ready && axi_valid) begin
-			axi_last	<= 'b0;
-		end
-	end
-end
-
 
 endmodule
