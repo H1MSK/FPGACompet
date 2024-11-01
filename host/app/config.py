@@ -1,4 +1,5 @@
 from qfluentwidgets import *
+from PySide6.QtCore import Slot
 
 class Config(QConfig):
   """ 应用配置 """
@@ -17,3 +18,17 @@ class Config(QConfig):
   
 config = Config()
 qconfig.load('config/config.json', config)
+
+@Slot()
+def _guardThresholdLow(high_value):
+  if config.threshold_low.value >= high_value:
+    config.threshold_low.value = high_value
+    
+
+@Slot()
+def _guardThresholdHigh(low_value):
+  if config.threshold_high.value <= low_value:
+    config.threshold_high.value = low_value
+
+config.threshold_high.valueChanged.connect(_guardThresholdLow)
+config.threshold_low.valueChanged.connect(_guardThresholdHigh)

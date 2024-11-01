@@ -65,7 +65,7 @@ class ConnectionCard(GroupHeaderCardWidget):
     @Slot()
     def connectToHost(self):
         if self.connected: return
-        from app.widgets.main_window import main_window
+        from app.main_window import main_window
         try:
             web_client.connect(self.addr_edit.text(), self.port_spin.value())
         except ConnectionRefusedError:

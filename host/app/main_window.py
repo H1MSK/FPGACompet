@@ -13,7 +13,8 @@ from qfluentwidgets import (
     InfoBar, SingleDirectionScrollArea
 )
 from qfluentwidgets import FluentIcon as FIF
-from app.widgets.home_interface import HomeInterface
+from app.interfaces.home_interface import HomeInterface
+from app.interfaces.proc_interface import ProcInterface
 
 
 class MainWindow(MSFluentWindow):
@@ -22,6 +23,7 @@ class MainWindow(MSFluentWindow):
 
         # create sub interface
         self.homeInterface = self._buildPageForWidget(HomeInterface(self), "home-page")
+        self.procInterface = self._buildPageForWidget(ProcInterface(self), "proc-page")
         # self.appInterface = Widget('Application Interface', self)
         # self.videoInterface = Widget('Video Interface', self)
         # self.libraryInterface = Widget('library Interface', self)
@@ -31,7 +33,7 @@ class MainWindow(MSFluentWindow):
 
     def initNavigation(self):
         self.addSubInterface(self.homeInterface, FIF.HOME, '主页', FIF.HOME_FILL)
-        # self.addSubInterface(self.appInterface, FIF.APPLICATION, '应用')
+        self.addSubInterface(self.procInterface, FIF.PHOTO, '应用')
         # self.addSubInterface(self.videoInterface, FIF.VIDEO, '视频')
 
         # self.addSubInterface(self.libraryInterface, FIF.BOOK_SHELF, '库', FIF.LIBRARY_FILL, NavigationItemPosition.BOTTOM)

@@ -1,9 +1,8 @@
 from PySide6.QtWidgets import (QFrame, QVBoxLayout, QSpacerItem)
 from qfluentwidgets import TitleLabel
 from app.widgets.connection_card import ConnectionCard
-from app.widgets.base_interface import BaseInterface
+from app.interfaces.base_interface import BaseInterface
 from app.widgets.argument_card import ArgumentCard
-
 
 class HomeInterface(QFrame):
     def __init__(self, parent=None):
