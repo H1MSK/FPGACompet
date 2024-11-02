@@ -84,23 +84,26 @@ class ProcInterface(QFrame):
             
     @Slot()
     def pickInputImage(self):
-        name, _ = QFileDialog.getOpenFileName(self, "选择输入图像", "", "图像文件 (*.bmp *.jpeg *.jpg *.png)")
-        if len(name) == 0:
-            return
-        img = QImage(name, format=None)
-        if img.width() != 1024 or img.height() != 1024:
-            from app.main_window import main_window
-            w = Dialog(
-                "自动转换",
-                f"选中图像尺寸为{img.width()}x{img.height()}，"
-                "输入图像尺寸需要为1024x1024，是否进行自动转换？",
-                main_window)
-            w.yesButton.setText("转换")
-            w.cancelButton.setText("取消")
-            if not w.exec():
-                print("canceled input image pick")
+        while True:
+            name, _ = QFileDialog.getOpenFileName(self, "选择输入图像", "", "图像文件 (*.bmp *.jpeg *.jpg *.png)")
+            if len(name) == 0:
                 return
-            img = img.scaled(1024, 1024)
+            img = QImage(name, format=None)
+            if img.width() != 1024 or img.height() != 1024:
+                from app.main_window import main_window
+                w = Dialog(
+                    "自动转换",
+                    f"选中图像尺寸为{img.width()}x{img.height()}，"
+                    "输入图像尺寸需要为1024x1024，是否进行自动转换？",
+                    main_window)
+                w.yesButton.setText("转换")
+                w.cancelButton.setText("重新选择...")
+                if not w.exec():
+                    print("canceled input image pick")
+                    continue
+                else:
+                    img = img.scaled(1024, 1024)
+                    break
         self.input_image.setImage(img)
         self.input_image.scaledToWidth(self.column_width)
 
