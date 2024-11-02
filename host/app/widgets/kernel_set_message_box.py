@@ -5,15 +5,20 @@ from app.widgets.gaussian_kernel_widget import GaussianKernelWidget
 
 from PySide6.QtCore import Slot
 from PySide6.QtWidgets import QHBoxLayout, QWidget
-from qfluentwidgets import BodyLabel, ComboBox, MessageBoxBase, PushButton, SubtitleLabel
+from qfluentwidgets import (
+    BodyLabel,
+    ComboBox,
+    MessageBoxBase,
+    PushButton,
+    SubtitleLabel,
+)
 
 
 class KernelSetMessageBox(MessageBoxBase):
-    def __init__(self, kernel_data: KernelObject, parent = None):
+    def __init__(self, kernel_data: KernelObject, parent=None):
         super().__init__(parent)
 
         self.mode = 1
-        self.gauss_sigma = 1.0
 
         self.title_label = SubtitleLabel("参数设置")
 
@@ -57,15 +62,16 @@ class KernelSetMessageBox(MessageBoxBase):
         self.kernel_text.setText(
             f"核参数：[{self.kernel_data.kernel_00:.4f}, {self.kernel_data.kernel_01:.4f}, "
             f"{self.kernel_data.kernel_02:.4f}, {self.kernel_data.kernel_11:.4f}, "
-            f"{self.kernel_data.kernel_12:.4f}, {self.kernel_data.kernel_22:.4f}]")
+            f"{self.kernel_data.kernel_12:.4f}, {self.kernel_data.kernel_22:.4f}]"
+        )
 
     @Slot(int)
     def setMode(self, mode_index: int):
-        if mode_index == 0: # Gauss
+        if mode_index == 0:  # Gauss
             self.filter_gauss_sigma_widget.setVisible(True)
             self.custom_kernel_widget.setVisible(False)
             self.mode = 0
-        elif mode_index == 1: # Custom
+        elif mode_index == 1:  # Custom
             self.filter_gauss_sigma_widget.setVisible(False)
             self.custom_kernel_widget.setVisible(True)
             self.mode = 1

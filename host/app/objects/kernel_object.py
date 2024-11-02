@@ -1,28 +1,30 @@
 from PySide6.QtCore import QObject, Signal, Slot
-
-
+from app.config import app_cfg
 import math
 
 
 class KernelObject(QObject):
     kernelChanged = Signal(int, float)
-    def __init__(self, parent = None) -> None:
+
+    def __init__(self, parent=None) -> None:
         super().__init__(parent)
         self.normalized = False
-        self.kernel_00 = 1.0
-        self.kernel_01 = 0.0
-        self.kernel_02 = 0.0
-        self.kernel_11 = 0.0
-        self.kernel_12 = 0.0
-        self.kernel_22 = 0.0
-
-    def copyDataFrom(self, obj):
-        for i in range(6):
-            self.setKernel(i, obj.getKernel(i))
-        self.normalized = obj.normalized
+        self.kernel_00 = app_cfg.kernel_00.value
+        self.kernel_01 = app_cfg.kernel_01.value
+        self.kernel_02 = app_cfg.kernel_02.value
+        self.kernel_11 = app_cfg.kernel_11.value
+        self.kernel_12 = app_cfg.kernel_12.value
+        self.kernel_22 = app_cfg.kernel_22.value
 
     def getKernel(self, pos: int):
-        return [self.kernel_00, self.kernel_01, self.kernel_02, self.kernel_11, self.kernel_12, self.kernel_22][pos]
+        return (
+            self.kernel_00,
+            self.kernel_01,
+            self.kernel_02,
+            self.kernel_11,
+            self.kernel_12,
+            self.kernel_22,
+        )[pos]
 
     def getQuantizedKernel(self, pos):
         return math.floor(self.getKernel(pos) * 256)
@@ -63,7 +65,14 @@ class KernelObject(QObject):
 
     @Slot()
     def normalizeKernel(self):
-        kernels = [self.kernel_00, self.kernel_01, self.kernel_02, self.kernel_11, self.kernel_12, self.kernel_22]
+        kernels = [
+            self.kernel_00,
+            self.kernel_01,
+            self.kernel_02,
+            self.kernel_11,
+            self.kernel_12,
+            self.kernel_22,
+        ]
         sumup = sum(kernels) * 4 - 3 * kernels[0] + 4 * kernels[4]
         print(f"kernels: {kernels}, sumup: {sumup}")
         norm = [round(k / sumup, 4) for k in kernels]

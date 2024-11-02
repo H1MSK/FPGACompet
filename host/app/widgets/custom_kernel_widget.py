@@ -12,6 +12,7 @@ import functools
 
 class CustomKernelWidget(QWidget):
     indexes = [12, 7, 2, 6, 1, 0]
+
     def __init__(self, kernel_data: KernelObject, parent=None) -> None:
         super().__init__(parent)
         self.kernel_data = kernel_data
@@ -28,7 +29,9 @@ class CustomKernelWidget(QWidget):
             self.boxes[idx].valueChanged.connect(
                 functools.partial(
                     lambda kernel_idx, val: self.kernel_data.setKernel(kernel_idx, val),
-                    i))
+                    i,
+                )
+            )
             self.kernel_data.kernelChanged.connect(self.onKernelDataChanged)
 
         self.grid_layout = QGridLayout(self)
@@ -40,23 +43,25 @@ class CustomKernelWidget(QWidget):
                     continue
                 kernel_row = row - 2
                 kernel_col = col - 2
-                if kernel_row > 0: kernel_row = -kernel_row
-                if kernel_col > 0: kernel_col = -kernel_col
+                if kernel_row > 0:
+                    kernel_row = -kernel_row
+                if kernel_col > 0:
+                    kernel_col = -kernel_col
                 if kernel_row > kernel_col:
                     kernel_row, kernel_col = kernel_col, kernel_row
                 ref_row = kernel_row + 2
                 ref_col = kernel_col + 2
                 self.boxes[ref_row * 5 + ref_col].valueChanged.connect(
                     functools.partial(
-                        lambda pos, val: self.boxes[pos].setValue(val),
-                        row * 5 + col))
+                        lambda pos, val: self.boxes[pos].setValue(val), row * 5 + col
+                    )
+                )
                 print(f"{row} {col} is linked to {ref_row} {ref_col}")
                 self.boxes[row * 5 + col].setEnabled(False)
                 self.boxes[row * 5 + col].setValue(
                     self.boxes[ref_row * 5 + ref_col].value()
                 )
         self.setLayout(self.grid_layout)
-
 
     @Slot(int, float)
     def onKernelDataChanged(self, kernel, val):

@@ -5,6 +5,9 @@ from constant import *
 
 _sock: socket.socket = None
 
+def connected():
+  return _sock is not None
+
 def connect(host = "169.254.128.192", port = 10240):
   global _sock
   _sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -13,8 +16,9 @@ def connect(host = "169.254.128.192", port = 10240):
 def disconnect():
   global _sock
   _sock.close()
+  _sock = None
 
-def write_img(img: List[int]):
+def write_img(img: List[int] | bytes):
   global _sock
   
   content = bytes(img)

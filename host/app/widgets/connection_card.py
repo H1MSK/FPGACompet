@@ -1,19 +1,25 @@
 from PySide6.QtCore import Qt, Signal, Slot, QTimer
-from PySide6.QtWidgets import (
-    QHBoxLayout, QApplication
-)
+from PySide6.QtWidgets import QHBoxLayout
 from qfluentwidgets import (
-    GroupHeaderCardWidget, PushButton, LineEdit, IconWidget,
-    BodyLabel, InfoBarIcon, PrimaryPushButton, FluentIcon, SpinBox,
-    InfoBar
+    GroupHeaderCardWidget,
+    PushButton,
+    LineEdit,
+    IconWidget,
+    BodyLabel,
+    InfoBarIcon,
+    PrimaryPushButton,
+    FluentIcon,
+    SpinBox,
+    InfoBar,
 )
 from qfluentwidgets import FluentIcon as FIF
-from app.config import config
+from app.config import app_cfg
 import web_client
+
 
 class ConnectionCard(GroupHeaderCardWidget):
     connectionStateChanged = Signal(bool)
-    
+
     def __init__(self, parent=None):
         super().__init__(parent)
         self.connected = False
@@ -31,12 +37,12 @@ class ConnectionCard(GroupHeaderCardWidget):
 
         self.addr_edit.setFixedWidth(320)
         self.addr_edit.setPlaceholderText("输入主机地址")
-        self.addr_edit.setText(config.get(config.addr))
-        self.addr_edit.textChanged.connect(lambda x: config.set(config.addr, x))
+        self.addr_edit.setText(app_cfg.get(app_cfg.addr))
+        self.addr_edit.textChanged.connect(lambda x: app_cfg.set(app_cfg.addr, x))
         self.port_spin.setFixedWidth(320)
         self.port_spin.setRange(1, 65535)
-        self.port_spin.setValue(config.get(config.port))
-        self.port_spin.valueChanged.connect(lambda x: config.set(config.port, x))
+        self.port_spin.setValue(app_cfg.get(app_cfg.port))
+        self.port_spin.valueChanged.connect(lambda x: app_cfg.set(app_cfg.port, x))
 
         # 设置底部工具栏布局
         self.hint_icon.setFixedSize(16, 16)
@@ -50,44 +56,52 @@ class ConnectionCard(GroupHeaderCardWidget):
         self.bottom_layout.setAlignment(Qt.AlignVCenter)
 
         # 添加组件到分组中
-        self.addGroup(FIF.GLOBE, "主机地址", "FPGA 设备的网络地址", self.addr_edit).setSeparatorVisible(True)
-        self.addGroup(FIF.LINK, "端口号", "FPGA 设备的 TCP 端口号", self.port_spin).setSeparatorVisible(True)
+        self.addGroup(
+            FIF.GLOBE, "主机地址", "FPGA 设备的网络地址", self.addr_edit
+        ).setSeparatorVisible(True)
+        self.addGroup(
+            FIF.LINK, "端口号", "FPGA 设备的 TCP 端口号", self.port_spin
+        ).setSeparatorVisible(True)
 
         # 添加底部工具栏
         self.vBoxLayout.addLayout(self.bottom_layout)
-        
+
         self.connect_button.clicked.connect(self.connectToHost)
         self.disconnect_button.clicked.connect(self.disconnectFromHost)
         self.connectionStateChanged.connect(self.updateWidgets)
-        
+
         QTimer.singleShot(0, lambda: self.connectionStateChanged.emit(False))
-        
+
     @Slot()
     def connectToHost(self):
-        if self.connected: return
+        if self.connected:
+            return
         from app.main_window import main_window
+
         try:
             web_client.connect(self.addr_edit.text(), self.port_spin.value())
         except ConnectionRefusedError:
-            print('ConnectionRefused')
+            print("ConnectionRefused")
             InfoBar.error(
-                '连接失败', f'无法连接到{self.addr_edit.text()}:{self.port_spin.value()}',
+                "连接失败",
+                f"无法连接到{self.addr_edit.text()}:{self.port_spin.value()}",
                 duration=3000,
-                parent=main_window
+                parent=main_window,
             )
         else:
-            print('connected')
+            print("connected")
             self.connected = True
             self.connectionStateChanged.emit(self.connected)
-        
+
     @Slot()
     def disconnectFromHost(self):
-        if not self.connected: return
+        if not self.connected:
+            return
         web_client.disconnect()
-        print('disconnected')
+        print("disconnected")
         self.connected = False
         self.connectionStateChanged.emit(self.connected)
-    
+
     @Slot()
     def updateWidgets(self):
         connect_disable = self.connected

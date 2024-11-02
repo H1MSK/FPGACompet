@@ -13,15 +13,10 @@ import math
 class GaussianKernelWidget(QWidget):
     gaussSizeChanged = Signal(int)
     gaussSigmaChanged = Signal(float)
-    def __init__(self, kernel_data: KernelObject, parent = None):
+
+    def __init__(self, kernel_data: KernelObject, parent=None):
         super().__init__(parent)
         self.kernel_data = kernel_data
-        self.kernel_data.setKernel(0, 1.0)
-        self.kernel_data.setKernel(1, 0.0)
-        self.kernel_data.setKernel(2, 0.0)
-        self.kernel_data.setKernel(3, 0.0)
-        self.kernel_data.setKernel(4, 0.0)
-        self.kernel_data.setKernel(5, 0.0)
 
         self.gauss_size = 3
         self.gauss_sigma = 1.0
@@ -51,11 +46,8 @@ class GaussianKernelWidget(QWidget):
         self.grid_layout.addWidget(self.sigma_edit, 1, 1)
         self.setLayout(self.grid_layout)
 
-
         self.gaussSizeChanged.connect(self.updateGaussianKernel)
         self.gaussSigmaChanged.connect(self.updateGaussianKernel)
-
-        self.updateGaussianKernel()
 
     @Slot(int)
     def setGaussSize(self, index: int):
@@ -76,15 +68,13 @@ class GaussianKernelWidget(QWidget):
     @Slot()
     def updateGaussianKernel(self):
         sigma = self.gauss_sigma
+
         def gauss(x, y, sigma):
-            return (1 / (2 * math.pi * sigma ** 2)) * math.exp((- (x ** 2 + y ** 2) / (2 * sigma ** 2)))
-        kernels = [
-            gauss(0, 0, sigma),
-            gauss(0, 1, sigma),
-            0,
-            gauss(1, 1, sigma),
-            0, 0
-        ]
+            return (1 / (2 * math.pi * sigma**2)) * math.exp(
+                (-(x**2 + y**2) / (2 * sigma**2))
+            )
+
+        kernels = [gauss(0, 0, sigma), gauss(0, 1, sigma), 0, gauss(1, 1, sigma), 0, 0]
         if self.gauss_size == 5:
             kernels[2] = gauss(0, 2, sigma)
             kernels[4] = gauss(1, 2, sigma)

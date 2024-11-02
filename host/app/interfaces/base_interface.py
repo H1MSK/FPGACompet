@@ -1,12 +1,12 @@
 # coding:utf-8
 from PySide6.QtCore import Qt
-from PySide6.QtGui import QPainter, QPen, QColor
 from PySide6.QtWidgets import QWidget, QVBoxLayout
 
-from qfluentwidgets import (ScrollArea, isDarkTheme)
+from qfluentwidgets import ScrollArea
+
 
 class BaseInterface(ScrollArea):
-    """ Gallery interface """
+    """Gallery interface"""
 
     def __init__(self, parent=None):
         """
@@ -33,7 +33,7 @@ class BaseInterface(ScrollArea):
         self.vBoxLayout.setAlignment(Qt.AlignTop)
         self.vBoxLayout.setContentsMargins(36, 20, 36, 36)
 
-        self.view.setObjectName('view')
-        
+        self.view.setObjectName("view")
+
     def addWidget(self, widget):
         self.vBoxLayout.addWidget(widget, 0, Qt.AlignTop)
