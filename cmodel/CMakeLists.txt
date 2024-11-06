@@ -3,7 +3,9 @@ project(conv.algo)
 
 include_directories(./inc)
 
-add_compile_options(-Wall -Wextra)
+add_compile_options(-Wall -Wextra -fopenmp)
+
+add_link_options(-fopenmp)
 
 aux_source_directory(./src SRC_LIST)
 

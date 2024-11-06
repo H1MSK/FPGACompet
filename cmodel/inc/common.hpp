@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cstdint>
+
 using float_t = float;
 
 constexpr int MAX_CHANNEL = 32;

@@ -17,7 +17,7 @@ void printConvCoreData(const ConvCore& core) {
 
 void testLoadData() {
   Net net = load("../model.bin");
-  printf("Blocks count: %d\n", net.blocks.size());
+  printf("Blocks count: %ld\n", net.blocks.size());
   for (int i = 0, _end = net.blocks.size(); i < _end; i++) {
     printf("Block %d:\n", i);
     printf("  Conv1:\n");

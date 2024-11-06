@@ -1,6 +1,7 @@
 #pragma once
 
 #include <array>
+#include <vector>
 
 #include "common.hpp"
 
@@ -11,6 +12,8 @@ struct SingleChannelFlowData {
 
   RowArrayType& operator[] (int i) { return data[i]; }
   const RowArrayType& operator[] (int i) const { return data[i]; }
+
+  void loadFromFp(int width, int height, FILE *fp);
 
   DataArrayType::iterator begin() { return data.begin(); }
   DataArrayType::iterator end() { return data.end(); }
@@ -26,12 +29,14 @@ struct SingleChannelFlowData {
 };
 
 struct FlowData {
-  using DataArrayType = std::array<SingleChannelFlowData, MAX_CHANNEL>;
+  using DataArrayType = std::vector<SingleChannelFlowData>;
   int width, height;
   DataArrayType data;
 
   SingleChannelFlowData& operator[] (int i) { return data[i]; }
   const SingleChannelFlowData& operator[] (int i) const { return data[i]; }
+
+  void loadFromFp(FILE *fp);
 
   DataArrayType::iterator begin() { return data.begin(); }
   DataArrayType::iterator end() { return data.end(); }

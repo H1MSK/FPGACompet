@@ -21,9 +21,7 @@ SingleChannelFlowData Matrix33::apply(
 #pragma omp parallel for
     for (int j = 0; j < width; j++) {
       float_t sum = 0;
-#pragma omp unroll full
       for (int k = 0; k < 3; k++) {
-#pragma omp unroll full
         for (int l = 0; l < 3; l++) {
           sum += data[k * 3 + l] *
                  bound_pad(width, height, input, i + k - 1, j + l - 1);
@@ -37,6 +35,7 @@ SingleChannelFlowData Matrix33::apply(
 
 FlowData ConvCore::apply(const FlowData& input) const {
   FlowData flow_data;
+  flow_data.channel_count = output_channels;
   flow_data.width = input.width;
   flow_data.height = input.height;
   for (int oc = 0; oc < output_channels; oc++) {
@@ -49,6 +48,7 @@ FlowData ConvCore::apply(const FlowData& input) const {
       out_channel += channel;
     }
   }
+  return flow_data;
 }
 
 void ReLu_inplace(FlowData& input) {
