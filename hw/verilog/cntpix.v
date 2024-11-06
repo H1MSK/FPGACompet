@@ -3,9 +3,9 @@
 module cntpix(
 	input			clk,
 	input			rst_n,
-	input			input_valid,
-	input			input_ready,
+	input			en_1,
 	input			input_last,
+
 	input			output_valid,
 	input			output_ready,
 
@@ -23,7 +23,7 @@ always@(posedge clk or negedge rst_n) begin
 	end
 	else begin
 		if(state[1] || state[0]) begin
-			if(input_valid && input_ready) begin
+			if(en_1) begin
 				cnt_pix	<= cnt_pix + 'd1;
 			end
 		end
@@ -34,16 +34,16 @@ always@(posedge clk or negedge rst_n) begin
 end
 
 always@* begin
-	if(cnt_pix < 'd5149) begin					//buffing	//1026*2 + 3 + 6 + 1025 + 2 + 5 + 1025 + 2 + 2 + 1025 + 2 = 5149
+	if(cnt_pix < 'd1026) begin					//buffing
 		state	= 'b0001;
 	end
-	else if((cnt_pix >= 'd5149) && (cnt_pix < 'd1050624)) begin	//buf done	//1026*1024 = 1050624
+	else if((cnt_pix >= 'd1026) && (cnt_pix < 'd1049599)) begin	//buf done	//1025*1024 = 1049600
 		state	= 'b0010;
 	end
-	else if((cnt_pix >= 'd1050624) && (cnt_pix < 'd1055773)) begin	//pic input done//1050624 + 5149 = 1055773
+	else if((cnt_pix >= 'd1049599) && (cnt_pix < 'd1049605)) begin	//pic input done//1049600 + 6 
 		state	= 'b0100;
 	end
-	else if(cnt_pix >= 'd1055773)begin				//process done			
+	else if(cnt_pix >= 'd1049605)begin				//process done			
 		state	= 'b1000;
 	end
 	else begin

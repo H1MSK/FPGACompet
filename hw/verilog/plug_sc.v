@@ -9,14 +9,24 @@ module plug_sc(
 );
 
 always@* begin
-	if(state == 'b0001) begin
-		iready	= 'b1;
-		ovalid	= 'b0;
-	end
-	else begin
-		iready	= oready;
-		ovalid	= ivalid;
-	end
+	case(state)
+		'b0001: begin
+			iready	= 'b1;
+			ovalid	= 'b0;
+		end
+		'b0010: begin
+			iready	= oready;
+			ovalid	= ivalid;
+		end
+		'b0100: begin
+			iready	= oready;
+			ovalid	= 'b1;
+		end
+		default: begin
+			iready	= 'b0;
+			ovalid	= 'b0;
+		end
+	endcase
 end
 
 endmodule
