@@ -1,3 +1,4 @@
+#include "common.hpp"
 #include "conv_core.hpp"
 #include "matrix33.hpp"
 #include "res_block.hpp"
@@ -35,11 +36,10 @@ SingleChannelFlowData Matrix33::apply(
 
 FlowData ConvCore::apply(const FlowData& input) const {
   FlowData flow_data;
-  flow_data.channel_count = output_channels;
   flow_data.width = input.width;
   flow_data.height = input.height;
   for (int oc = 0; oc < output_channels; oc++) {
-    auto& out_channel = flow_data[oc];
+    SingleChannelFlowData out_channel = flow_data[oc];
     for (auto& row : out_channel)
       row.fill(0);
     for (int ic = 0; ic < input_channels; ic++) {
@@ -47,6 +47,7 @@ FlowData ConvCore::apply(const FlowData& input) const {
           weights[oc][ic].apply(input.width, input.height, input[ic]);
       out_channel += channel;
     }
+    flow_data.data.push_back(out_channel);
   }
   return flow_data;
 }

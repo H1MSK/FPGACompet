@@ -13,4 +13,6 @@ extern "C" {
 typedef struct Net Net;
 Net load(const char* filename);
 
+typedef struct ConvCore ConvCore;
+void printConvCoreData(const ConvCore& core);
 }
