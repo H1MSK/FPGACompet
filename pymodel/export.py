@@ -26,11 +26,10 @@ def exportTensor3d(tensor, fp):
   ic, h, w = tensor.shape
   i_np = tensor.detach().cpu().numpy()
   fp.write(struct.pack("<HHHH", 1, ic, h, w))
-  for oc in range(oc):
-    for ic in range(ic):
-      for h in range(h):
-        for w in range(w):
-          fp.write(struct.pack("<f", i_np[ic, h, w]))
+  for ch in range(ic):
+    for row in range(h):
+      for col in range(w):
+        fp.write(struct.pack("<f", i_np[ch, row, col]))
 
 def export(out_file = "model.bin"):
   fp = open(out_file, "wb")
