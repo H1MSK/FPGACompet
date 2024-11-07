@@ -30,10 +30,15 @@ void ResBlock::loadFromFp(FILE *fp) {
   conv2.loadFromFp(fp);
 }
 
-void Net::loadFromFp(FILE *fp) {
-  for (auto& block : blocks) {
-    block.loadFromFp(fp);
-  }
+void Net::loadFromFp(FILE* fp) {
+    int layer_count;
+    int cnt = fread(&layer_count, sizeof(int), 1, fp);
+    assert(cnt == 1);
+    for (int i = 0; i < layer_count; i++) {
+        blocks.emplace_back();
+        ResBlock& block = blocks.back();
+        block.loadFromFp(fp);
+    }
 }
 
 void SingleChannelFlowData::loadFromFp(int width, int height, FILE *fp) {
@@ -48,12 +53,12 @@ void FlowData::loadFromFp(FILE *fp) {
   int cnt = fread(&x, sizeof(uint16_t), 4, fp);
   assert(cnt == 4 && x[0] == 1);  // we only support batch_size = 1 currently
   int channel_count = x[1];
-  width = x[2];
-  height = x[3];
+  height = x[2];
+  width = x[3];
   for(int i = 0; i < channel_count; i++) {
-    SingleChannelFlowData channel;
+    data.emplace_back();
+    SingleChannelFlowData &channel = data.back();
     channel.loadFromFp(width, height, fp);
-    data.push_back(channel);
   }
 }
 
@@ -65,13 +70,6 @@ Net load(const char* filename) {
   }
   printf("Loading model data...\n");
   Net net;
-  int layer_count;
-  int cnt = fread(&layer_count, sizeof(int), 1, fp);
-  assert(cnt == 1);
-  for (int i = 0; i < layer_count; i++) {
-    ResBlock block;
-    block.loadFromFp(fp);
-    net.blocks.push_back(block);
-  }
+  net.loadFromFp(fp);
   return net;
 }

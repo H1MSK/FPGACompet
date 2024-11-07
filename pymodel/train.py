@@ -24,4 +24,4 @@ def train(train_model: L.LightningModule, save_dir: str):
   trainer.fit(train_model, data_loader, val_data_loader)
 
 if __name__ == "__main__":
-  train(LitModelV2(32), "./train/model_v2")
+  train(LitModel(32), "./train/model_v1")

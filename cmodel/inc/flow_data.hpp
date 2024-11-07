@@ -10,13 +10,17 @@ struct SingleChannelFlowData {
   using DataArrayType = std::array<RowArrayType, MAX_HEIGHT>;
   DataArrayType data;
 
-  RowArrayType& operator[] (int i) { return data[i]; }
-  const RowArrayType& operator[] (int i) const { return data[i]; }
+  SingleChannelFlowData() : data() {}
+
+  RowArrayType& operator[] (int i) { return data[(size_t)i]; }
+  const RowArrayType& operator[] (int i) const { return data[(size_t)i]; }
 
   void loadFromFp(int width, int height, FILE *fp);
 
   DataArrayType::iterator begin() { return data.begin(); }
   DataArrayType::iterator end() { return data.end(); }
+  DataArrayType::const_iterator cbegin() const { return data.cbegin(); }
+  DataArrayType::const_iterator cend() const { return data.cend(); }
 
   SingleChannelFlowData& operator+=(const SingleChannelFlowData& other) {
     for (int i = 0; i < MAX_HEIGHT; i++) {
@@ -33,11 +37,15 @@ struct FlowData {
   int width, height;
   DataArrayType data;
 
-  SingleChannelFlowData& operator[] (int i) { return data[i]; }
-  const SingleChannelFlowData& operator[] (int i) const { return data[i]; }
+  FlowData() : width(0), height(0), data() {}
+
+  SingleChannelFlowData& operator[] (int i) { return data[(size_t)i]; }
+  const SingleChannelFlowData& operator[] (int i) const { return data[(size_t)i]; }
 
   void loadFromFp(FILE *fp);
 
   DataArrayType::iterator begin() { return data.begin(); }
   DataArrayType::iterator end() { return data.end(); }
+  DataArrayType::const_iterator cbegin() const { return data.cbegin(); }
+  DataArrayType::const_iterator cend() const { return data.cend(); }
 };

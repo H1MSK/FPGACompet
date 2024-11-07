@@ -14,5 +14,16 @@ typedef struct Net Net;
 Net load(const char* filename);
 
 typedef struct ConvCore ConvCore;
-void printConvCoreData(const ConvCore& core);
+void printConvCoreData(const ConvCore& core, int leading_space = 0);
+
+void printNet(const Net& net, int leading_space = 0);
+
+typedef struct SingleChannelFlowData SingleChannelFlowData;
+void printSingleChannelFlowData(int width,
+                                int height,
+                                const SingleChannelFlowData& data,
+                                int leading_space = 0);
+
+typedef struct FlowData FlowData;
+void printFlowData(const FlowData& data, int leading_space = 0);
 }

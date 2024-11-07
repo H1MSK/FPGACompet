@@ -2,6 +2,7 @@
 #include "conv_core.hpp"
 #include "matrix33.hpp"
 #include "res_block.hpp"
+#include "net.hpp"
 
 inline float_t bound_pad(int width,
                          int height,
@@ -39,7 +40,8 @@ FlowData ConvCore::apply(const FlowData& input) const {
   flow_data.width = input.width;
   flow_data.height = input.height;
   for (int oc = 0; oc < output_channels; oc++) {
-    SingleChannelFlowData out_channel;
+    flow_data.data.emplace_back();
+    SingleChannelFlowData &out_channel = flow_data.data.back();
     for (auto& row : out_channel)
       row.fill(0);
     for (int ic = 0; ic < input_channels; ic++) {
@@ -47,7 +49,6 @@ FlowData ConvCore::apply(const FlowData& input) const {
           weights[oc][ic].apply(input.width, input.height, input[ic]);
       out_channel += channel;
     }
-    flow_data.data.push_back(out_channel);
   }
   return flow_data;
 }
@@ -68,5 +69,12 @@ FlowData ResBlock::apply(bool relu_at_output, const FlowData& input) const {
   output = conv2.apply(output);
   if (relu_at_output)
     ReLu_inplace(output);
+  return output;
+}
+
+FlowData Net::apply(const FlowData& input) const {
+  FlowData output = input;
+  for (int i = 0, _end = (int)blocks.size(); i < _end; ++i)
+    output = blocks[i].apply(i + 1 != _end, output);
   return output;
 }

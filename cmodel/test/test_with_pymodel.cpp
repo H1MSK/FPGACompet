@@ -1,47 +1,43 @@
 #include <algorithm>
 #include <cassert>
 #include "common.hpp"
-#include "conv_core.hpp"
+#include "net.hpp"
 
-ConvCore core;
+Net net;
 FlowData in, out;
 FlowData expected;
 int main() {
   printf("Testing order\n");
 
-  FILE* fp = fopen("conv.bin", "rb");
-  assert(fp != NULL);
-  core.loadFromFp(fp);
-  fclose(fp);
-  printf("Core:\n");
-  printConvCoreData(core, 2);
-  fp = NULL;
-  printf("Loaded core with %d input channels and %d output channels\n",
-         core.input_channels, core.output_channels);
+  net = load("model.bin");
 
-  fp = fopen("input.bin", "rb");
+  printf("Net:\n");
+  printNet(net, 2);
+  printf("Loaded net with %d blocks\n", (int)net.blocks.size());
+
+  FILE* fp = fopen("input.bin", "rb");
   assert(fp != NULL);
   in.loadFromFp(fp);
   fclose(fp);
-  printf("Input:\n");
-  printFlowData(in, 2);
+  printf("Input loaded.\n");
+  // printFlowData(in, 2);
   fp = NULL;
   printf("Loaded input with %d channels, %d rows, %d cols\n",
          (int)in.data.size(), in.height, in.width);
 
-  out = core.apply(in);
-  printf("Out:\n");
-  printFlowData(out, 2);
+  out = net.apply(in);
+  printf("Output loaded.\n");
+  // printFlowData(out, 2);
   printf(
       "Applied core to input, got output with %d channels, %d rows, %d cols\n",
       (int)out.data.size(), out.height, out.width);
 
-  fp = fopen("output.bin", "rb");
+  fp = fopen("py_out.bin", "rb");
   assert(fp != NULL);
   expected.loadFromFp(fp);
   fclose(fp);
-  printf("Expected:\n");
-  printFlowData(expected, 2);
+  printf("Expected loaded.\n");
+  // printFlowData(expected, 2);
   fp = NULL;
   printf("Loaded expected output with %d channels, %d rows, %d cols\n",
          (int)expected.data.size(), expected.height, expected.width);

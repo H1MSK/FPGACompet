@@ -1,4 +1,5 @@
 import struct
+from typing import Optional
 import lightning as L
 import torch
 import cv2
@@ -9,7 +10,12 @@ from lit_model import LitModel
 from lit_modelv2 import LitModel as LitModelV2
 from config import *
 
-def exportConv(fp, conv: nn.Conv2d):
+def exportConv(conv: nn.Conv2d, fp):
+  if isinstance(fp, str):
+    with open(fp, "wb") as the_fp:
+      exportConv(conv, the_fp)
+    return
+
   weight = conv.weight
   p_oc, p_ic, p_h, p_w = weight.shape
   # byte 4+i*Group+0~1: p_oc
@@ -23,6 +29,11 @@ def exportConv(fp, conv: nn.Conv2d):
           fp.write(struct.pack("<f", dat[h, w]))
 
 def exportTensor3d(tensor, fp):
+  if isinstance(fp, str):
+    with open(fp, "wb") as the_fp:
+      exportTensor3d(tensor, the_fp)
+    return
+
   ic, h, w = tensor.shape
   i_np = tensor.detach().cpu().numpy()
   fp.write(struct.pack("<HHHH", 1, ic, h, w))
@@ -31,23 +42,24 @@ def exportTensor3d(tensor, fp):
       for col in range(w):
         fp.write(struct.pack("<f", i_np[ch, row, col]))
 
-def export(out_file = "model.bin"):
-  fp = open(out_file, "wb")
+def exportModel(model: Optional[LitModel], fp = "model.bin"):
+  if isinstance(fp, str):
+    with open(fp, "wb") as the_fp:
+      exportModel(model, the_fp)
+    return
 
-  model = LitModel.load_from_checkpoint(CHECKPOINT, hidden_channels=32).to("cpu")
-
-  model.eval()
+  if model is None:
+    model = LitModel.load_from_checkpoint(CHECKPOINT, hidden_channels=32).to("cpu")
+    model.eval()
 
   fp.write(struct.pack("<I", 1))  # byte #0~3: 1 resblock
 
-  exportConv(fp, model.model.conv1)
-  exportConv(fp, model.model.conv2)
-
-  fp.close()
+  exportConv(model.model.conv1, fp)
+  exportConv(model.model.conv2, fp)
 
 def exportv2():
+  raise NotImplementedError()
   model = LitModelV2.load_from_checkpoint(CHECKPOINT, hidden_channels=32)
-  pass
 
 if __name__ == "__main__":
-  export()
+  exportModel()
