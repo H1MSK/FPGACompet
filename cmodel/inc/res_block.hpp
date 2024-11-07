@@ -4,10 +4,10 @@
 #include "common.hpp"
 #include "conv_core.hpp"
 
-class ResBlock {
-public:
+struct ResBlock {
   ConvCore conv1, conv2;
-  void loadFromFp(FILE *fp);
+
+  void loadFromFp(FILE* fp);
 
   FlowData apply(bool relu_at_output, const FlowData& input) const;
 };

@@ -3,10 +3,12 @@
 #include "conv_core.hpp"
 #include "flow_data.hpp"
 #include "net.hpp"
+#include "quantized_conv_core.hpp"
+#include "quantized_net.hpp"
 
-void printConvCoreData(const ConvCore& core, int leading_space) {
-  printf("%*sInput channels: %d\n", leading_space, "", core.input_channels);
-  printf("%*sOutput channels: %d\n", leading_space, "", core.output_channels);
+void printConvCore(const ConvCore& core, int leading_space) {
+  printf("%*sCore: ch=%d-%d\n", leading_space, "", core.input_channels,
+         core.output_channels);
   for (int j = 0, _end2 = core.output_channels; j < _end2; j++) {
     for (int k = 0, _end3 = core.input_channels; k < _end3; k++) {
       printf("%*sWeight (%d, %d):\n", leading_space, "", j, k);
@@ -28,8 +30,38 @@ void printNet(const Net& net, int leading_space) {
     printf("%*sBlock %d: channels=%d-%d-%d\n", leading_space + 2, "", i,
            block.conv1.input_channels, block.conv1.output_channels,
            block.conv2.output_channels);
-    printConvCoreData(block.conv1, leading_space + 4);
-    printConvCoreData(block.conv2, leading_space + 4);
+    printConvCore(block.conv1, leading_space + 4);
+    printConvCore(block.conv2, leading_space + 4);
+  }
+}
+
+void printQuantizedConvCore(const QuantizedConvCore& core, int leading_space) {
+  printf("%*sCore: scale=%f, ch=%d-%d\n", leading_space, "", core.scale,
+         core.input_channels, core.output_channels);
+  for (int j = 0, _end2 = core.output_channels; j < _end2; j++) {
+    for (int k = 0, _end3 = core.input_channels; k < _end3; k++) {
+      printf("%*sWeight (%d, %d):\n", leading_space, "", j, k);
+      const QuantizedMatrix33& mat = core.weights[j][k];
+      printf("%*s  %d %d %d\n", leading_space, "", mat.data[0], mat.data[1],
+             mat.data[2]);
+      printf("%*s  %d %d %d\n", leading_space, "", mat.data[3], mat.data[4],
+             mat.data[5]);
+      printf("%*s  %d %d %d\n", leading_space, "", mat.data[6], mat.data[7],
+             mat.data[8]);
+    }
+  }
+}
+
+void printQuantizedNet(const QuantizedNet& net, int leading_space) {
+  printf("%*sNet: %d blocks, bitwidth=%d\n", leading_space, "",
+         (int)net.blocks.size(), net.bitwidth);
+  for (int i = 0, _end = (int)net.blocks.size(); i < _end; i++) {
+    auto& block = net.blocks[i];
+    printf("%*sBlock %d: channels=%d-%d-%d\n", leading_space + 2, "", i,
+           block.conv1.input_channels, block.conv1.output_channels,
+           block.conv2.output_channels);
+    printQuantizedConvCore(block.conv1, leading_space + 4);
+    printQuantizedConvCore(block.conv2, leading_space + 4);
   }
 }
 

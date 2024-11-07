@@ -15,15 +15,15 @@ int main() {
   for (int i = 0, _end = (int)net.blocks.size(); i < _end; i++) {
     printf("Block %d:\n", i);
     printf("  Conv1:\n");
-    printConvCoreData(net.blocks[i].conv1, 4);
+    printConvCore(net.blocks[i].conv1, 4);
     printf("  Conv2:\n");
-    printConvCoreData(net.blocks[i].conv2, 4);
+    printConvCore(net.blocks[i].conv2, 4);
   }
 
   FILE* fp = fopen("conv.bin", "rb");
   assert(fp != NULL);
   conv.loadFromFp(fp);
-  printConvCoreData(conv);
+  printConvCore(conv);
   fclose(fp);
   fp = NULL;
 

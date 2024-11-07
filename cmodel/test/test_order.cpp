@@ -14,7 +14,7 @@ int main() {
   core.loadFromFp(fp);
   fclose(fp);
   printf("Core:\n");
-  printConvCoreData(core, 2);
+  printConvCore(core, 2);
   fp = NULL;
   printf("Loaded core with %d input channels and %d output channels\n",
          core.input_channels, core.output_channels);
