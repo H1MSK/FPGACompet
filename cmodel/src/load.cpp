@@ -7,7 +7,7 @@
 #include "flow_data.hpp"
 
 void Matrix33::loadFromFp(FILE *fp) {
-  int cnt = fread(data.data(), sizeof(float_t), 9, fp);
+  int cnt = fread(data.data(), sizeof(float_point), 9, fp);
   assert(cnt == 9);
 }
 
@@ -43,7 +43,7 @@ void Net::loadFromFp(FILE* fp) {
 
 void SingleChannelFlowData::loadFromFp(int width, int height, FILE *fp) {
   for (int r = 0; r < height; r++) {
-    int cnt = fread(data[r].data(), sizeof(float_t), width, fp);
+    int cnt = fread(data[r].data(), sizeof(float_point), width, fp);
     assert(cnt == width);
   }
 }

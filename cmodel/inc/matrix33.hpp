@@ -5,15 +5,20 @@
 #include "common.hpp"
 #include "flow_data.hpp"
 
-class Matrix33
-{
-public:
-  Matrix33(): data() {}
+class Matrix33 {
+ public:
+  Matrix33() : data() {}
   ~Matrix33() {}
 
-  SingleChannelFlowData apply(int width, int height, const SingleChannelFlowData& input) const;
+  SingleChannelFlowData apply(int width,
+                              int height,
+                              const SingleChannelFlowData& input) const;
+  void macApply(int width,
+                int height,
+                const SingleChannelFlowData& input,
+                SingleChannelFlowData& output) const;
 
-  void loadFromFp(FILE *fp);
+  void loadFromFp(FILE* fp);
 
-  std::array<float_t, 9> data;
+  std::array<float_point, 9> data;
 };

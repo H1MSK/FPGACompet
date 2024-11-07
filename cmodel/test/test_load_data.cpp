@@ -12,7 +12,7 @@ FlowData in, out;
 int main() {
   net = load("model.bin");
   printf("Blocks count: %d\n", (int)net.blocks.size());
-  for (int i = 0, _end = net.blocks.size(); i < _end; i++) {
+  for (int i = 0, _end = (int)net.blocks.size(); i < _end; i++) {
     printf("Block %d:\n", i);
     printf("  Conv1:\n");
     printConvCoreData(net.blocks[i].conv1, 4);

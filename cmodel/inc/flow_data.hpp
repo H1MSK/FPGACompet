@@ -6,7 +6,7 @@
 #include "common.hpp"
 
 struct SingleChannelFlowData {
-  using RowArrayType = std::array<float_t, MAX_WIDTH>;
+  using RowArrayType = std::array<float_point, MAX_WIDTH>;
   using DataArrayType = std::array<RowArrayType, MAX_HEIGHT>;
   DataArrayType data;
 
