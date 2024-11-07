@@ -2,7 +2,7 @@
 #include "common.hpp"
 #include "net.hpp"
 
-void testLoadData() {
+int main() {
   Net net = load("../model.bin");
   printf("Blocks count: %ld\n", net.blocks.size());
   for (int i = 0, _end = net.blocks.size(); i < _end; i++) {
@@ -12,4 +12,5 @@ void testLoadData() {
     printf("  Conv2:\n");
     printConvCoreData(net.blocks[i].conv2);
   }
+  return 0;
 }

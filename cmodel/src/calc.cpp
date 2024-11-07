@@ -39,7 +39,7 @@ FlowData ConvCore::apply(const FlowData& input) const {
   flow_data.width = input.width;
   flow_data.height = input.height;
   for (int oc = 0; oc < output_channels; oc++) {
-    SingleChannelFlowData out_channel = flow_data[oc];
+    SingleChannelFlowData out_channel;
     for (auto& row : out_channel)
       row.fill(0);
     for (int ic = 0; ic < input_channels; ic++) {

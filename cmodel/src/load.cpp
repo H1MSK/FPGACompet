@@ -12,13 +12,11 @@ void Matrix33::loadFromFp(FILE *fp) {
 }
 
 void ConvCore::loadFromFp(FILE *fp) {
-  uint16_t x;
-  int cnt = fread(&x, 2, 1, fp);
-  output_channels = x;
-  assert(cnt == 1);
-  cnt = fread(&x, 2, 1, fp);
-  input_channels = x;
-  assert(cnt == 1);
+  uint16_t x[2];
+  int cnt = fread(x, sizeof(uint16_t), 2, fp);
+  assert(cnt == 2);
+  output_channels = x[0];
+  input_channels = x[1];
 
   for (int oc = 0; oc < output_channels; oc++) {
     for (int ic = 0; ic < input_channels; ic++) {
@@ -47,7 +45,7 @@ void SingleChannelFlowData::loadFromFp(int width, int height, FILE *fp) {
 
 void FlowData::loadFromFp(FILE *fp) {
   uint16_t x[4];
-  int cnt = fread(&x, 2, 4, fp);
+  int cnt = fread(&x, sizeof(uint16_t), 4, fp);
   assert(cnt == 4 && x[0] == 1);  // we only support batch_size = 1 currently
   int channel_count = x[1];
   width = x[2];
