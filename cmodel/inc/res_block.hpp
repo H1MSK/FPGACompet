@@ -9,5 +9,7 @@ struct ResBlock {
 
   void loadFromFp(FILE* fp);
 
+  QuantizedResBlock quantize(int bitwidth) const;
+
   FlowData apply(bool relu_at_output, const FlowData& input) const;
 };

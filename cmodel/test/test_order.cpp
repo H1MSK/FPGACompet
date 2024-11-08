@@ -2,10 +2,17 @@
 #include <cassert>
 #include "common.hpp"
 #include "conv_core.hpp"
+#include "flow_data.hpp"
+#include "quantized_conv_core.hpp"
+#include "quantized_flow_data.hpp"
 
 ConvCore core;
 FlowData in, out;
 FlowData expected;
+
+QuantizedConvCore quant_core;
+QuantizedFlowData quant_in, quant_out;
+
 int main() {
   printf("Testing order\n");
 
@@ -58,6 +65,28 @@ int main() {
       }
     }
   }
-  printf("Success!\n");
+  printf("Unquantized version matched!\n");
+
+  quant_core = core.quantize(13);
+  printf("Quantized core:\n");
+  printQuantizedConvCore(quant_core, 2);
+
+  fp = fopen("input_quant.bin", "rb");
+  assert(fp != NULL);
+  quant_in.loadFromFp(fp);
+  fclose(fp);
+
+  printf("Quantized input:\n");
+  printQuantizedFlowData(quant_in, 2);
+  quant_out = quant_core.apply(13, quant_in);
+
+  printf("Quantized output:\n");
+  printQuantizedFlowData(quant_out, 2);
+
+  quant_out.requantizeTo(8);
+
+  printf("Requantized output:\n");
+  printQuantizedFlowData(quant_out, 2);
+
   return 0;
 }

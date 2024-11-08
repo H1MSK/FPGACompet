@@ -34,4 +34,11 @@ void printSingleChannelFlowData(int width,
                                 const SingleChannelFlowData& data,
                                 int leading_space = 0);
 void printFlowData(const FlowData& data, int leading_space = 0);
+void printQuantizedSingleChannelFlowData(
+    int width,
+    int height,
+    float_point scale,
+    const QuantizedSingleChannelFlowData& data,
+    int leading_space);
+void printQuantizedFlowData(const QuantizedFlowData& data, int leading_space);
 }

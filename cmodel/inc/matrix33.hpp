@@ -10,9 +10,6 @@ class Matrix33 {
   Matrix33() : data() {}
   ~Matrix33() {}
 
-  SingleChannelFlowData apply(int width,
-                              int height,
-                              const SingleChannelFlowData& input) const;
   void macApply(int width,
                 int height,
                 const SingleChannelFlowData& input,

@@ -7,7 +7,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 include_directories(./inc)
 
 if(MSVC)
-  add_compile_options(/D "_CRT_SECURE_NO_WARNINGS" /DEBUG /W4)
+  add_compile_options(/D "_CRT_SECURE_NO_WARNINGS" /DEBUG /W4 -openmp:llvm)
   add_link_options(/STACK:"33554432")
 else()
   add_compile_options(-g -Wall -Wextra)

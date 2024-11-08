@@ -8,7 +8,7 @@
 struct QuantizedResBlock {
   QuantizedConvCore conv1, conv2;
 
-  static QuantizedResBlock fromResBlock(const ResBlock& block, int bitwidth);
-
-  // QuantizedFlowData apply(bool relu_at_output, const QuantizedFlowData& input) const;
+  QuantizedFlowData apply(bool relu_at_output,
+                          int bitwidth,
+                          const QuantizedFlowData& input) const;
 };

@@ -16,11 +16,10 @@ struct SingleChannelFlowData {
   const RowArrayType& operator[] (int i) const { return data[(size_t)i]; }
 
   void loadFromFp(int width, int height, FILE *fp);
+  QuantizedSingleChannelFlowData quantize(int bitwidth) const;
 
   DataArrayType::iterator begin() { return data.begin(); }
   DataArrayType::iterator end() { return data.end(); }
-  DataArrayType::const_iterator cbegin() const { return data.cbegin(); }
-  DataArrayType::const_iterator cend() const { return data.cend(); }
 
   SingleChannelFlowData& operator+=(const SingleChannelFlowData& other) {
     for (int i = 0; i < MAX_HEIGHT; i++) {
@@ -43,9 +42,10 @@ struct FlowData {
   const SingleChannelFlowData& operator[] (int i) const { return data[(size_t)i]; }
 
   void loadFromFp(FILE *fp);
+  QuantizedFlowData quantize(int bitwidth) const;
 
   DataArrayType::iterator begin() { return data.begin(); }
   DataArrayType::iterator end() { return data.end(); }
-  DataArrayType::const_iterator cbegin() const { return data.cbegin(); }
-  DataArrayType::const_iterator cend() const { return data.cend(); }
+  DataArrayType::const_iterator begin() const { return data.begin(); }
+  DataArrayType::const_iterator end() const { return data.end(); }
 };

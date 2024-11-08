@@ -9,5 +9,7 @@ struct Net {
   
   void loadFromFp(FILE *fp);
 
+  QuantizedNet quantize(int bitwidth) const;
+
   FlowData apply(const FlowData& input) const;
 };

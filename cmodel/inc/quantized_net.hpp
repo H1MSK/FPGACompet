@@ -8,7 +8,5 @@ struct QuantizedNet {
   int bitwidth;
   std::vector<QuantizedResBlock> blocks;
 
-  static QuantizedNet fromNet(const Net& net, int bitwidth);
-
-  // FlowData apply(const FlowData& input) const;
+  QuantizedFlowData apply(const QuantizedFlowData& input) const;
 };

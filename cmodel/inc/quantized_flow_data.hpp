@@ -10,15 +10,24 @@ struct QuantizedSingleChannelFlowData {
   using DataArrayType = std::array<RowArrayType, MAX_HEIGHT>;
   DataArrayType data;
 
+  struct FlatAccessor {
+    DataArrayType& data;
+    int width;
+    int& operator[](int x) {
+      return data[(size_t)(x / width)][(size_t)(x % width)];
+    }
+  };
+
   QuantizedSingleChannelFlowData() : data() {}
 
   RowArrayType& operator[](int i) { return data[(size_t)i]; }
   const RowArrayType& operator[](int i) const { return data[(size_t)i]; }
 
+  void loadFromFp(int width, int height, FILE* fp);
+
+  FlatAccessor flatAccessor(int width) { return FlatAccessor{data, width}; }
   DataArrayType::iterator begin() { return data.begin(); }
   DataArrayType::iterator end() { return data.end(); }
-  DataArrayType::const_iterator cbegin() const { return data.cbegin(); }
-  DataArrayType::const_iterator cend() const { return data.cend(); }
 };
 
 struct QuantizedFlowData {
@@ -33,8 +42,12 @@ struct QuantizedFlowData {
     return data[(size_t)i];
   }
 
+  void loadFromFp(FILE* fp);
+
+  void requantizeTo(int target_bitwidth);
+
   DataArrayType::iterator begin() { return data.begin(); }
   DataArrayType::iterator end() { return data.end(); }
-  DataArrayType::const_iterator cbegin() const { return data.cbegin(); }
-  DataArrayType::const_iterator cend() const { return data.cend(); }
+  DataArrayType::const_iterator begin() const { return data.begin(); }
+  DataArrayType::const_iterator end() const { return data.end(); }
 };

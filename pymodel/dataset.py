@@ -347,12 +347,10 @@ class BipedDataset(Dataset):
         data_root,
         img_height,
         img_width,
-        mean_bgr,
         train_mode="train",
         dataset_type="rgbr",
         #  is_scaling=None,
         # Whether to crop image or otherwise resize image to match image height and width.
-        crop_img=False,
         arg=None,
     ):
         self.data_root = data_root
@@ -360,8 +358,6 @@ class BipedDataset(Dataset):
         self.dataset_type = dataset_type
         self.img_height = img_height
         self.img_width = img_width
-        self.mean_bgr = mean_bgr
-        self.crop_img = crop_img
         self.arg = arg
 
         self.data_index = self._build_index()
@@ -391,12 +387,8 @@ class BipedDataset(Dataset):
                 file_name = os.path.splitext(file_name_ext)[0]
                 sample_indices.append(
                     (
-                        os.path.join(
-                            images_path, directory_name, file_name + ".jpg"
-                        ),
-                        os.path.join(
-                            labels_path, directory_name, file_name + ".png"
-                        ),
+                        os.path.join(images_path, directory_name, file_name + ".jpg"),
+                        os.path.join(labels_path, directory_name, file_name + ".png"),
                     )
                 )
         return sample_indices
@@ -412,7 +404,7 @@ class BipedDataset(Dataset):
         image = cv2.imread(image_path, cv2.IMREAD_COLOR)
         label = cv2.imread(label_path, cv2.IMREAD_GRAYSCALE)
         image, label = self.transform(img=image, gt=label)
-        return image / 255., label
+        return image, label
 
     def transform(self, img, gt):
         gt = np.array(gt, dtype=np.float32)
@@ -422,81 +414,24 @@ class BipedDataset(Dataset):
         gt /= 255.0  # for DexiNed input and BDCN
 
         img = np.array(img, dtype=np.float32)
-        img -= self.mean_bgr
-        i_h, i_w, _ = img.shape
-        # data = []
-        # if self.scale is not None:
-        #     for scl in self.scale:
-        #         img_scale = cv2.resize(img, None, fx=scl, fy=scl, interpolation=cv2.INTER_LINEAR)
-        #         data.append(torch.from_numpy(img_scale.transpose((2, 0, 1))).float())
-        #     return data, gt
-        #  400 for BIPEd and 352 for BSDS check with 384
-        # crop_size = (
-        #     self.img_height if self.img_height == self.img_width else None
-        # )  # 448# MDBD=480 BIPED=480/400 BSDS=352
+        img = img - img.min()
+        img = img * 2 / img.max() - 1
 
-        # # for BSDS 352/BRIND
-        # if i_w > crop_size and i_h > crop_size:
-        #     i = random.randint(0, i_h - crop_size)
-        #     j = random.randint(0, i_w - crop_size)
-        #     img = img[i : i + crop_size, j : j + crop_size]
-        #     gt = gt[i : i + crop_size, j : j + crop_size]
-
-        # # for BIPED/MDBD
-        # if np.random.random() > 0.4: #l
-        #     h,w = gt.shape
-        #     if i_w> 500 and i_h>500:
-        #
-        #         LR_img_size = crop_size #l BIPED=256, 240 200 # MDBD= 352 BSDS= 176
-        #         i = random.randint(0, h - LR_img_size)
-        #         j = random.randint(0, w - LR_img_size)
-        #         # if img.
-        #         img = img[i:i + LR_img_size , j:j + LR_img_size ]
-        #         gt = gt[i:i + LR_img_size , j:j + LR_img_size ]
-        #     else:
-        #         LR_img_size = 352#256  # l BIPED=208-352, # MDBD= 352-480- BSDS= 176-320
-        #         i = random.randint(0, h - LR_img_size)
-        #         j = random.randint(0, w - LR_img_size)
-        #         # if img.
-        #         img = img[i:i + LR_img_size, j:j + LR_img_size]
-        #         gt = gt[i:i + LR_img_size, j:j + LR_img_size]
-        #         img = cv2.resize(img, dsize=(crop_size, crop_size), )
-        #         gt = cv2.resize(gt, dsize=(crop_size, crop_size))
-
-        # else:
-        #     # New addidings
-        #     img = cv2.resize(img, dsize=(crop_size, crop_size))
-        #     gt = cv2.resize(gt, dsize=(crop_size, crop_size))
-        # BRIND
         gt[gt > 0.1] += 0.2  # 0.4
         gt = np.clip(gt, 0.0, 1.0)
-        # gt[gt > 0.1] =1#0.4
-        # gt = np.clip(gt, 0., 1.)
-        # # for BIPED
-        # gt[gt > 0.2] += 0.6# 0.5 for BIPED
-        # gt = np.clip(gt, 0., 1.) # BIPED
-        # # for MDBD
-        # gt[gt > 0.1] +=0.7
-        # gt = np.clip(gt, 0., 1.)
-        # # For RCF input
-        # # -----------------------------------
-        # gt[gt==0]=0.
-        # gt[np.logical_and(gt>0.,gt<0.5)] = 2.
-        # gt[gt>=0.5]=1.
-        #
-        # gt = gt.astype('float32')
-        # ----------------------------------
 
         img = img.transpose((2, 0, 1))
         img = img
         gt = np.array([gt])
         return img, gt
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     import cv2
-    dataset = BipedDataset("D:/DataSets/BIPED/", 720, 1080, 0)
+
+    dataset = BipedDataset("D:/DataSets/BIPED/", 720, 1080)
     img, gt = dataset[0]
     print(type(img))
-    cv2.imshow("img", img.transpose((1,2,0)))
-    cv2.imshow("gt", gt.transpose((1,2,0)))
+    cv2.imshow("img", img.transpose((1, 2, 0)) * 0.5 + 0.5)
+    cv2.imshow("gt", gt.transpose((1, 2, 0)))
     cv2.waitKey()
