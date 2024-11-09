@@ -5,7 +5,7 @@ import numpy as np
 
 from dataset import BipedDataset
 from lit_model import LitModel
-from config import *
+from algorithm.pymodel.constant import *
 
 
 def test():

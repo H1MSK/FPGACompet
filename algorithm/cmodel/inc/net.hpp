@@ -7,6 +7,7 @@
 struct Net {
   std::vector<ResBlock> blocks;
   
+  const uint8_t* loadFromBytes(const uint8_t* bytes);
   void loadFromFp(FILE *fp);
 
   QuantizedNet quantize(int bitwidth) const;

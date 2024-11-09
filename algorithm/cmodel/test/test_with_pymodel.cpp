@@ -32,7 +32,7 @@ int main() {
       "Applied core to input, got output with %d channels, %d rows, %d cols\n",
       (int)out.data.size(), out.height, out.width);
 
-  fp = fopen("py_out.bin", "rb");
+  fp = fopen("output.bin", "rb");
   assert(fp != NULL);
   expected.loadFromFp(fp);
   fclose(fp);

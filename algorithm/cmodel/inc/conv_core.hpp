@@ -22,6 +22,7 @@ struct ConvCore {
   ConstFlatAccessor flatAccessor() const { return ConstFlatAccessor{*this}; }
 
   void loadFromFp(FILE* fp);
+  const uint8_t *loadFromBytes(const uint8_t* bytes);
 
   QuantizedConvCore quantize(int bitwidth) const;
 

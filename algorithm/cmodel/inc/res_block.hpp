@@ -7,6 +7,7 @@
 struct ResBlock {
   ConvCore conv1, conv2;
 
+  const uint8_t *loadFromBytes(const uint8_t* bytes);
   void loadFromFp(FILE* fp);
 
   QuantizedResBlock quantize(int bitwidth) const;

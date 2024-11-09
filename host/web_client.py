@@ -91,3 +91,8 @@ def read_arg(addr: int):
   print(f"recv {data}")
 
   return data
+
+def write_weights(model: bytes):
+  global _sock
+  content = bytes(model)
+  header = struct.pack('<IIHHI', ID_WRITE_WEIGHTS, 0, 3, 32, len(content))

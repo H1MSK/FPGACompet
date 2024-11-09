@@ -3,7 +3,7 @@ import torch
 
 from dataset import BipedDataset
 from lit_model import LitModel
-from config import *
+from constant import *
 from export import exportIntTensor3d, exportModel, exportTensor3d
 
 

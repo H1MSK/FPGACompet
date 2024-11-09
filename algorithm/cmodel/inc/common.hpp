@@ -8,6 +8,12 @@ constexpr int MAX_CHANNEL = 32;
 constexpr int MAX_WIDTH = 1280;
 constexpr int MAX_HEIGHT = 720;
 
+constexpr uint32_t ID_CONV_FLOAT = 0x12345678;
+constexpr uint32_t ID_CONV_QUANT = 0x9ABCDEF0;
+constexpr uint32_t ID_FLOW_FLOAT = 0x87654321;
+constexpr uint32_t ID_FLOW_QUANT = 0xFEDCBA98;
+constexpr uint32_t ID_MODEL = 0x23456789;
+
 extern "C" {
 
 typedef struct Net Net;

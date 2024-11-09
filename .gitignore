@@ -1,6 +1,8 @@
-board/build
-
 __pycache__
-host/.venv
+.venv
+.vscode
+
 host/config
 host/test_out.png
+
+board/build

@@ -16,6 +16,7 @@ class Matrix33 {
                 SingleChannelFlowData& output) const;
 
   void loadFromFp(FILE* fp);
+  const uint8_t* loadFromBytes(const uint8_t* bytes);
 
   std::array<float_point, 9> data;
 };
