@@ -1,0 +1,6 @@
+.venv
+.vscode
+config
+__pycache__
+test_out.png
+out_img.png

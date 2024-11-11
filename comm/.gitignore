@@ -1,0 +1,12 @@
+__pycache__
+.venv
+.vscode
+
+host/config
+host/test_out.png
+
+board/build
+
+train
+*.bin
+*.png
