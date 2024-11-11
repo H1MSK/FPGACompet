@@ -7,4 +7,6 @@ host/test_out.png
 
 board/build
 
+train
 *.bin
+*.png

@@ -5,6 +5,7 @@ from dataset import BipedDataset
 from lit_model import LitModel
 from constant import *
 from export import exportIntTensor3d, exportModel, exportTensor3d
+import cv2
 
 
 def testWithCModel():
@@ -37,6 +38,10 @@ def testWithCModel():
 
     quant_img = (img_tensor * 127).round().clone().detach().type(torch.int8)
     exportIntTensor3d(quant_img, "input_quant.bin")
+    
+    cv2.imwrite("./input.png", ((img + 1) * 127).transpose(1, 2, 0))
+    cv2.imwrite("./ground.png", gt.transpose(1, 2, 0))
+    cv2.imwrite("./output.png", (out * 255).transpose(1, 2, 0))
 
 
 if __name__ == "__main__":

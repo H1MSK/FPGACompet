@@ -1,5 +1,5 @@
 CHECKPOINT = (
-    "train/model_v1/lightning_logs/version_1/checkpoints/epoch=321-step=3864.ckpt"
+    "train/model_v1/lightning_logs/version_0/checkpoints/last.ckpt"
 )
 ID_CONV_FLOAT = 0x12345678
 ID_CONV_QUANT = 0x9ABCDEF0
