@@ -92,6 +92,8 @@ QuantizedFlowData QuantizedConvCore::apply(
     for (auto& row : out_channel)
       row.fill(0);
     for (int ic = 0; ic < input_channels; ic++) {
+      printf("conv %2d %2d\r", oc, ic);
+      fflush(stdout);
       weights[oc][ic].macApply(input.width, input.height, input[ic],
                                out_channel);
     }

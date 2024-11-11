@@ -71,7 +71,8 @@ const uint8_t* Net::loadFromBytes(const uint8_t* bytes) {
   assert(magic == ID_MODEL);
   int layer_count;
   layer_count = *iptr++;
-  blocks.reserve(layer_count);
+  blocks.clear();
+  // blocks.reserve(layer_count);
   auto bptr = (const uint8_t*)iptr;
   for (int i = 0; i < layer_count; i++) {
     blocks.emplace_back();

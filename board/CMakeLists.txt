@@ -6,6 +6,13 @@ include_directories(./algo/inc)
 
 add_subdirectory(./algo)
 
+if(MSVC)
+  add_compile_options(/D "_CRT_SECURE_NO_WARNINGS" /DEBUG /W4 -openmp:llvm)
+  add_link_options(/STACK:"33554432")
+else()
+  add_compile_options(-g -Wall -Wextra)
+endif()
+
 aux_source_directory(./common SRC_COMMON)
 aux_source_directory(./sim SRC_SIM)
 

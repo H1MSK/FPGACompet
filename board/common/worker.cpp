@@ -27,10 +27,9 @@ inline static uint32_t min(uint32_t a, uint32_t b) {
 inline static bool do_recv_img() {
   in_img.width = client.data.img_size.width;
   in_img.height = client.data.img_size.height;
-  in_img.data.clear();
-  auto& ch0 = in_img.data.emplace_back();
-  auto& ch1 = in_img.data.emplace_back();
-  auto& ch2 = in_img.data.emplace_back();
+  in_img.bitwidth = 8;
+  in_img.scale = 1 / 127.f;
+  in_img.data.resize(3);
   uint32_t total_len = client.content_len;
 
   assert(total_len == in_img.width * in_img.height);
@@ -43,9 +42,9 @@ inline static bool do_recv_img() {
   for (int r = 0; r < in_img.height; ++r) {
     read_data(buf, in_img.width);
     for (int c = 0; c < in_img.width; ++c) {
-      ch0[r][c] = buf[c];
-      ch1[r][c] = buf[c];
-      ch2[r][c] = buf[c];
+      in_img[0][r][c] = buf[c] - 128;
+      in_img[1][r][c] = buf[c] - 128;
+      in_img[2][r][c] = buf[c] - 128;
     }
   }
   delete[] buf;
@@ -77,7 +76,7 @@ inline static bool do_send_img() {
   auto& ch = out_img[0];
   for (int r = 0; r < out_img.height; ++r) {
     for (int c = 0; c < out_img.width; ++c)
-      buf[c] = ch[r][c];
+      buf[c] = ch[r][c] + 128;
     write_data(buf, out_img.width);
   }
   delete[] buf;
@@ -111,7 +110,7 @@ inline static bool do_read_arg() {
 }
 
 inline static bool do_write_model() {
-  uint8_t* bytes = new uint8_t[server.content_len];
+  uint8_t* bytes = new uint8_t[client.content_len];
 
   uint32_t total_len = client.content_len;
   printf("#%u: recv weights, content length: %u\n", (unsigned)pack_cnt,
@@ -130,7 +129,12 @@ inline static bool do_write_model() {
   net.loadFromBytes(bytes);
   delete bytes;
   qnet = net.quantize(13);
-  return true;
+
+  server.status = 'o' + ('k' << 8);
+  server._reserved = 0;
+  server.content_len = 0;
+  int len = write_data((uint8_t*)&server, sizeof(server));
+  return len == sizeof(server);
 }
 
 extern "C" void do_net_apply() {
