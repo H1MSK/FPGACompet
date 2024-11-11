@@ -13,6 +13,14 @@ def main():
 
         apply_threshold(1, 64)
         apply_gaussian_filter(1, 3)
+        
+        with open("model.bin", "rb") as fp:
+            buf = fp.read()
+
+        print("start sending weights")
+        write_weights(buf)
+        del buf
+        print("weights sent to FPGA")
 
         img_in: np.ndarray = cv2.imread("./test_in.png", cv2.IMREAD_GRAYSCALE)
         print(f"image read from disk, shape: {img_in.shape}")

@@ -3,10 +3,11 @@
 
 #include <stdint.h>
 
-#define ID_WRITE_IMG 0x01234567
-#define ID_READ_IMG  0x76543210
-#define ID_WRITE_ARG 0x89ABCDEF
-#define ID_READ_ARG  0xFEDCBA98
+#define ID_WRITE_IMG    0x01234567
+#define ID_READ_IMG     0x76543210
+#define ID_WRITE_ARG    0x89ABCDEF
+#define ID_READ_ARG     0xFEDCBA98
+#define ID_WRITE_MODEL  0x02468ACE
 
 typedef struct ClientPackHeader {
   uint32_t identifier;

@@ -18,6 +18,12 @@ def testWithCModel():
     dataset = BipedDataset("D:/DataSets/BIPED/", 720, 1080)
 
     img, gt = dataset[0]
+    
+    # reshape to (1024x1024)
+    delta = (1024-img.shape[1])//2
+    img = np.pad(img, pad_width=((0, 0), (delta, delta), (0, 0)))
+    img = img[:, :, :1024]
+    
     img_tensor = torch.tensor(img)
     exportTensor3d(img_tensor, "input.bin")
 

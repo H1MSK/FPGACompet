@@ -135,13 +135,16 @@ void QuantizedSingleChannelFlowData::loadFromFp(int width,
 }
 
 void QuantizedFlowData::loadFromFp(FILE* fp) {
-  uint16_t x[4];
-  int cnt = (int)fread(&x, sizeof(uint16_t), 4, fp);
-  assert(cnt == 4 && x[0] == 1);
+  uint16_t x[6];
+  int cnt = (int)fread(&x, sizeof(uint16_t), 6, fp);
+  assert(cnt == 6 && x[2] == 1);
 
-  int channel_count = x[1];
-  width = x[3];
-  height = x[2];
+  uint32_t magic = *((uint32_t*)x);
+  assert(magic == ID_FLOW_QUANT);
+
+  int channel_count = x[3];
+  width = x[5];
+  height = x[4];
   bitwidth = 8;
   scale = float_point(1.0) / (1 << (bitwidth - 1));
 

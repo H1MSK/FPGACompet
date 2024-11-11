@@ -4,6 +4,10 @@
 #include <stdint.h>
 #include "common.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // to IP
 void IP_init();
 void IP_process(uint16_t width,
@@ -21,7 +25,8 @@ void close_client();
 uint32_t read_data(uint8_t* data, uint32_t len);
 uint32_t write_data(const uint8_t* data, uint32_t len);
 
-extern uint8_t in_img[MAX_IMG_SIZE];
-extern uint8_t out_img[MAX_IMG_SIZE];
+#ifdef __cplusplus
+}  // extern "C"
+#endif
 
 #endif  // PAL_H

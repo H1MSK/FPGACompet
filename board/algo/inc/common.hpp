@@ -1,17 +1,18 @@
 #pragma once
 
 #include <cstdint>
+#include <cstdio>
 
 using float_point = float;
 
 constexpr int MAX_CHANNEL = 32;
-constexpr int MAX_WIDTH = 1280;
-constexpr int MAX_HEIGHT = 720;
+constexpr int MAX_WIDTH = 1024;
+constexpr int MAX_HEIGHT = 1024;
 
 constexpr uint32_t ID_CONV_FLOAT = 0x12345678;
 constexpr uint32_t ID_CONV_QUANT = 0x9ABCDEF0;
 constexpr uint32_t ID_FLOW_FLOAT = 0x87654321;
-constexpr uint32_t ID_FLOW_QUANT = 0xFEDCBA98;
+constexpr uint32_t ID_FLOW_QUANT = 0x0FEDCBA9;
 constexpr uint32_t ID_MODEL = 0x23456789;
 
 extern "C" {

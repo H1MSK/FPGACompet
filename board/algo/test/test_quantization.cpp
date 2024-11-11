@@ -1,5 +1,6 @@
 #include <cassert>
 #include <chrono>
+#include <algorithm>
 #include "flow_data.hpp"
 #include "net.hpp"
 #include "quantized_flow_data.hpp"
@@ -74,7 +75,7 @@ int main() {
     for (int r = 0; r < output.height; r++) {
       for (int c = 0; c < output.width; c++) {
         auto this_error =
-            abs(output[i][r][c] - quant_output[i][r][c] * quant_output.scale);
+            std::abs(output[i][r][c] - quant_output[i][r][c] * quant_output.scale);
         max_error = std::max(max_error, this_error);
         // if (this_error > 0.05) {
         //   printf("Mismatch at %d,%d,%d: %f != %d(%f)\n", i, r, c,

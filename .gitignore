@@ -6,3 +6,5 @@ host/config
 host/test_out.png
 
 board/build
+
+*.bin

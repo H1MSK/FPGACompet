@@ -10,7 +10,9 @@ void IP_init() {
 
 void IP_process(uint16_t width, uint16_t height, const uint8_t* in, uint8_t* out) {
   // memcpy(out, in, width * height * 1);
-  memset(out, 0, width * height * 1);
+  void do_net_apply();
+  do_net_apply();
+  return;
   printf("IP_process finished.\n");
 }
 
@@ -19,7 +21,7 @@ void IP_set(uint32_t addr, uint32_t val) {
   sim_mem[addr] = val;
   printf("IP_set@%d:%d.\n", addr, val);
   if (addr == 0 && val == 0x01) {
-    IP_process(1024, 1024, in_img, out_img);
+    IP_process(1024, 1024, NULL, NULL);
   }
 }
 
