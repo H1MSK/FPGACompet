@@ -9,7 +9,8 @@ void IP_init() {
 }
 
 void IP_process(uint16_t width, uint16_t height, const uint8_t* in, uint8_t* out) {
-  memcpy(out, in, width * height * 1);
+  // memcpy(out, in, width * height * 1);
+  memset(out, 0, width * height * 1);
   printf("IP_process finished.\n");
 }
 

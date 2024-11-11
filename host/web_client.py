@@ -92,7 +92,16 @@ def read_arg(addr: int):
 
   return data
 
-def write_weights(model: bytes):
+def write_weights(model_param: bytes):
   global _sock
-  content = bytes(model)
-  header = struct.pack('<IIHHI', ID_WRITE_WEIGHTS, 0, 3, 32, len(content))
+  content = bytes(model_param)
+  header = struct.pack('<IHHII', ID_WRITE_WEIGHTS, 0, 0, 0, len(content))
+  
+  buf = header + content
+  print("Write weights, sent")
+  _sock.send(buf)
+  resp = _sock.recv(8)
+  print(f"recv")
+  
+  (c0, c1, _, content_len) = struct.unpack('<ccHI', resp)
+  assert c0 == b'o' and c1 == b'k' and content_len == 0
